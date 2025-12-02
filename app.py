@@ -1,10 +1,10 @@
 """
 ANTY LAUNDRY - SISTEM SEGMENTASI PELANGGAN
 Menggunakan K-Means Clustering & RFM Analysis
-untuk Otomatisasi Pemberian Diskon
+VERSI SKRIPSI - Data 1 Bulan Terakhir
 
 Author: Anty Laundry Team
-Version: 1.3 (WITH GIF)
+Version: 2.0 (K-MEANS + FILTER 1 BULAN)
 """
 
 import streamlit as st
@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
-from datetime import datetime
+from datetime import datetime, timedelta
 import plotly.express as px
 import plotly.graph_objects as go
 from io import BytesIO
@@ -22,23 +22,497 @@ import urllib.parse
 # KONFIGURASI HALAMAN
 # ============================================================
 st.set_page_config(
-    page_title="Anty Laundry - Segmentasi Pelanggan",
+    page_title="Anty Laundry - K-Means Clustering",
     page_icon="🧺",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+# Ganti CSS di bagian st.markdown() dengan kode ini:
 
-# ============================================================
-# CSS CUSTOM
-# ============================================================
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Hide Streamlit branding */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    
+    /* Dark background gradient */
+    .stApp {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        background-attachment: fixed;
+    }
+    
+    /* Main container - dark theme */
+    .main .block-container {
+        background: rgba(26, 26, 46, 0.7);
+        backdrop-filter: blur(30px);
+        border-radius: 0px;
+        padding: 3rem 4rem;
+        box-shadow: none;
+        border: none;
+        max-width: 100%;
+    }
+    
+    /* Hero Header - Modern Dark */
     .main-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 2rem;
-        border-radius: 10px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        padding: 3rem 3rem;
+        border-radius: 24px;
         color: white;
+        margin-bottom: 3rem;
+        box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    }
+    
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 2.5rem;
+        position: relative;
+        z-index: 1;
+        flex-wrap: nowrap;
+    }
+    
+    .logo-img {
+        height: 90px;
+        width: 90px;
+        border-radius: 20px;
+        background: white;
+        padding: 12px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        object-fit: contain;
+        flex-shrink: 0;
+    }
+    
+    .header-text {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .header-text h1 {
+        margin: 0 0 0.3rem 0;
+        font-size: 2.8rem;
+        font-weight: 900;
+        letter-spacing: -1.5px;
+        line-height: 1.1;
+    }
+    
+    .header-text h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+        opacity: 0.95;
+        letter-spacing: 0.3px;
+    }
+    
+    .header-text p {
+        margin: 0;
+        font-size: 0.95rem;
+        opacity: 0.85;
+        font-weight: 400;
+    }
+    
+    /* Sidebar - Dark Purple */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+        border-right: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    
+    section[data-testid="stSidebar"] .block-container {
+        padding: 2rem 1.5rem;
+    }
+    
+    section[data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #f3f4f6 !important;
+        font-weight: 700 !important;
+    }
+    
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] div {
+        color: #e5e7eb !important;
+    }
+    
+    section[data-testid="stSidebar"] .stMarkdown {
+        color: #f3f4f6 !important;
+    }
+    
+    .sidebar-logo {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: rgba(139, 92, 246, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
         margin-bottom: 2rem;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    
+    .sidebar-logo img {
+        width: 100%;
+        max-width: 180px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    
+    /* Large Primary Button */
+    .stButton>button {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 16px;
+        padding: 1.2rem 2.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        text-transform: none;
+        letter-spacing: 0.5px;
+        width: 100%;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    }
+    
+    /* Metrics Cards - Glass Effect */
+    div[data-testid="stMetric"] {
+        background: rgba(99, 102, 241, 0.08);
+        backdrop-filter: blur(20px);
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    div[data-testid="stMetric"]:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+        background: rgba(99, 102, 241, 0.12);
+        border-color: rgba(99, 102, 241, 0.4);
+    }
+    
+    div[data-testid="stMetricValue"] {
+        font-size: 2.8rem;
+        font-weight: 900;
+        color: #a78bfa;
+        letter-spacing: -1px;
+    }
+    
+    div[data-testid="stMetricLabel"] {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+    
+    /* Alert boxes - Modern */
+    .stAlert {
+        border-radius: 16px;
+        border: none;
+        backdrop-filter: blur(10px);
+        font-weight: 500;
+        padding: 1.2rem 1.5rem;
+    }
+    
+    div[data-baseweb="notification"][kind="info"] {
+        background: rgba(59, 130, 246, 0.15);
+        border-left: 4px solid #3b82f6;
+        color: #93c5fd;
+    }
+    
+    div[data-baseweb="notification"][kind="success"] {
+        background: rgba(34, 197, 94, 0.15);
+        border-left: 4px solid #22c55e;
+        color: #86efac;
+    }
+    
+    div[data-baseweb="notification"][kind="warning"] {
+        background: rgba(251, 146, 60, 0.15);
+        border-left: 4px solid #fb923c;
+        color: #fdba74;
+    }
+    
+    div[data-baseweb="notification"][kind="error"] {
+        background: rgba(239, 68, 68, 0.15);
+        border-left: 4px solid #ef4444;
+        color: #fca5a5;
+    }
+    
+    /* Expanders - Dark Style */
+    .streamlit-expanderHeader {
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 1.3rem 1.5rem;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        color: #c4b5fd;
+        transition: all 0.3s ease;
+    }
+    
+    .streamlit-expanderHeader:hover {
+        background: rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.4);
+        color: #ddd6fe;
+    }
+    
+    /* DataFrames - Dark */
+    .dataframe {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        background: rgba(30, 27, 75, 0.5);
+    }
+    
+    .dataframe thead tr th {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        font-weight: 700;
+        padding: 1rem;
+        border: none;
+    }
+    
+    .dataframe tbody tr {
+        border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        color: #e5e7eb;
+    }
+    
+    .dataframe tbody tr:hover {
+        background: rgba(99, 102, 241, 0.08);
+    }
+    
+    .dataframe tbody tr td {
+        padding: 0.9rem 1rem;
+        border: none;
+    }
+    
+    /* File Uploader - Hero Style */
+    section[data-testid="stFileUploadDropzone"] {
+        background: rgba(99, 102, 241, 0.08);
+        border-radius: 24px;
+        padding: 3rem;
+        border: 2px dashed rgba(139, 92, 246, 0.4);
+        transition: all 0.3s ease;
+    }
+    
+    section[data-testid="stFileUploadDropzone"]:hover {
+        border-color: rgba(139, 92, 246, 0.7);
+        background: rgba(99, 102, 241, 0.12);
+    }
+    
+    section[data-testid="stFileUploadDropzone"] button {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.9rem 2rem;
+        font-weight: 600;
+    }
+    
+    /* Download Buttons - Success Color */
+    .stDownloadButton>button {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        font-weight: 600;
+        border: none;
+        border-radius: 14px;
+        padding: 1rem 1.8rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    }
+    
+    .stDownloadButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
+    }
+    
+    /* WhatsApp Button */
+    .stLinkButton>a {
+        background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+        color: white !important;
+        font-weight: 600;
+        border: none;
+        border-radius: 14px;
+        padding: 1rem 1.8rem;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+    }
+    
+    .stLinkButton>a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(37, 211, 102, 0.4);
+    }
+    
+    /* Select boxes */
+    div[data-baseweb="select"] {
+        background: rgba(30, 27, 75, 0.5);
+        border-radius: 14px;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    
+    div[data-baseweb="select"]:hover {
+        border-color: rgba(99, 102, 241, 0.5);
+    }
+    
+    div[data-baseweb="select"] > div {
+        color: #e5e7eb;
+    }
+    
+    /* Sidebar select boxes - force white text */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] {
+        background: rgba(139, 92, 246, 0.2);
+        border-color: rgba(139, 92, 246, 0.4);
+    }
+    
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+        color: #f3f4f6 !important;
+    }
+    
+    /* Divider */
+    hr {
+        margin: 3rem 0;
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
+    }
+    
+    /* Plotly Charts - Floating Effect */
+    .js-plotly-plot {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        background: rgba(30, 27, 75, 0.3);
+    }
+    
+    /* Headings - Light on Dark */
+    h1, h2, h3, h4, h5, h6 {
+        color: #f3f4f6;
+    }
+    
+    h2 {
+        font-weight: 800;
+        font-size: 2.2rem;
+        margin-top: 2.5rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -1px;
+    }
+    
+    h3 {
+        color: #c4b5fd;
+        font-weight: 700;
+        font-size: 1.4rem;
+    }
+    
+    /* Paragraphs */
+    p {
+        color: #d1d5db;
+        line-height: 1.7;
+    }
+    
+    /* Text area - Dark */
+    textarea {
+        background: rgba(30, 27, 75, 0.5) !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
+        border-radius: 14px !important;
+        color: #e5e7eb !important;
+        font-family: 'Courier New', monospace;
+    }
+    
+    textarea:focus {
+        border-color: rgba(99, 102, 241, 0.6) !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+    }
+    
+    /* Spinner */
+    .stSpinner > div {
+        border-top-color: #8b5cf6 !important;
+    }
+    
+    /* Success animation */
+    .stSuccess {
+        animation: slideInUp 0.5s ease-out;
+    }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Balloons override for dark theme */
+    .balloon {
+        filter: brightness(1.2);
+    }
+    
+    /* Tabs - if used */
+    button[data-baseweb="tab"] {
+        color: #9ca3af;
+        border-bottom: 2px solid transparent;
+        font-weight: 600;
+    }
+    
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: #a78bfa;
+        border-bottom-color: #a78bfa;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(30, 27, 75, 0.5);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: rgba(139, 92, 246, 0.5);
+        border-radius: 5px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(139, 92, 246, 0.7);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -58,13 +532,13 @@ class AntyLaundryKMeans:
         
     def find_column(self, df, keywords):
         """Mencari kolom berdasarkan keyword - prioritas exact match"""
-        # Coba exact match dulu (dengan spasi)
+        # Coba exact match dulu
         for keyword in keywords:
             for col in df.columns:
                 if str(col).lower().strip() == keyword.lower():
                     return col
         
-        # Kalau tidak ada, coba partial match (tanpa spasi)
+        # Kalau tidak ada, coba partial match
         for keyword in keywords:
             keyword_clean = keyword.lower().replace(' ', '').replace('_', '')
             for col in df.columns:
@@ -82,8 +556,8 @@ class AntyLaundryKMeans:
         
         return None
     
-    def load_and_clean_data(self, df):
-        """Membersihkan dan memvalidasi data"""
+    def load_and_clean_data(self, df, months_back=1):
+        """Membersihkan dan memvalidasi data - DENGAN FILTER PERIODE"""
         df = df.copy()
         
         st.info("🔍 Mencari kolom yang dibutuhkan...")
@@ -91,25 +565,32 @@ class AntyLaundryKMeans:
         # Auto-detect kolom
         col_mapping = {}
         
-        # Cari kolom Tanggal Ambil (termasuk yang terpotong)
+        # Cari kolom Tanggal Ambil
         tanggal_col = self.find_column(df, ['tanggal ar', 'tanggal ambil', 'tgl ambil', 'tanggalambil'])
         if tanggal_col:
             col_mapping[tanggal_col] = 'Tanggal'
             st.success(f"✅ Tanggal: **{tanggal_col}** → Tanggal")
         else:
             st.error("❌ Kolom 'Tanggal Ambil' tidak ditemukan!")
+            return None
         
         # Cari kolom Konsumen
         konsumen_col = self.find_column(df, ['konsumer', 'konsumen', 'customer', 'pelanggan'])
         if konsumen_col:
             col_mapping[konsumen_col] = 'Konsumen'
             st.success(f"✅ Konsumen: **{konsumen_col}** → Konsumen")
+        else:
+            st.error("❌ Kolom 'Konsumen' tidak ditemukan!")
+            return None
         
-        # Cari kolom Total Harga (termasuk yang terpotong)
+        # Cari kolom Total Harga
         harga_col = self.find_column(df, ['total harg', 'total harga', 'totalharga'])
         if harga_col:
             col_mapping[harga_col] = 'Total_Harga'
             st.success(f"✅ Total Harga: **{harga_col}** → Total_Harga")
+        else:
+            st.error("❌ Kolom 'Total Harga' tidak ditemukan!")
+            return None
         
         # Cari kolom Invoice/Nota
         invoice_col = self.find_column(df, ['nota', 'invoice', 'no nota', 'nonota', 'no.nota'])
@@ -123,27 +604,8 @@ class AntyLaundryKMeans:
             col_mapping[status_col] = 'Status_Order'
             st.success(f"✅ Status Order: **{status_col}** → Status_Order")
         
-        # Tampilkan mapping yang ditemukan
-        st.info(f"🔄 Mapping kolom (Asli → Baru): {col_mapping}")
-        
-        # Validasi sebelum rename
-        if tanggal_col not in col_mapping:
-            st.error("❌ Kolom Tanggal tidak ditemukan!")
-            return None
-        if konsumen_col not in col_mapping:
-            st.error("❌ Kolom Konsumen tidak ditemukan!")
-            return None
-        if harga_col not in col_mapping:
-            st.error("❌ Kolom Total Harga tidak ditemukan!")
-            return None
-        
         # Rename kolom
         df = df.rename(columns=col_mapping)
-        
-        # Debug: cek kolom setelah rename
-        st.info(f"📋 Kolom setelah rename: {df.columns.tolist()}")
-        
-        st.success(f"✅ Semua kolom wajib berhasil ditemukan dan di-rename!")
         
         # Filter data
         original_len = len(df)
@@ -156,28 +618,41 @@ class AntyLaundryKMeans:
             if before > after:
                 st.warning(f"⚠️ {before - after} transaksi batal dihapus")
         
+        # Convert tanggal DULU sebelum filter
+        try:
+            df['Tanggal'] = pd.to_datetime(df['Tanggal'], errors='coerce')
+            df = df.dropna(subset=['Tanggal'])
+        except Exception as e:
+            st.error(f"❌ Error parsing tanggal: {str(e)}")
+            return None
+        
+        # 🔴 INI YANG PENTING: FILTER PERIODE (1 BULAN TERAKHIR)
+        max_date = df['Tanggal'].max()
+        cutoff_date = max_date - timedelta(days=30 * months_back)
+        
+        st.info(f"📅 Tanggal maksimal: {max_date.strftime('%d/%m/%Y')}")
+        st.info(f"📅 Filter dari: {cutoff_date.strftime('%d/%m/%Y')}")
+        
+        df_before_filter = len(df)
+        df = df[df['Tanggal'] > cutoff_date]
+        df_after_filter = len(df)
+        
+        st.success(f"✅ Data difilter: {df_after_filter} transaksi dari {df_before_filter} (periode {months_back} bulan)")
+        st.success(f"✅ Periode: {df['Tanggal'].min().strftime('%d/%m/%Y')} - {df['Tanggal'].max().strftime('%d/%m/%Y')}")
+        
         # Filter Total Harga > 0
         if 'Total_Harga' in df.columns:
             df['Total_Harga'] = pd.to_numeric(df['Total_Harga'], errors='coerce')
             df = df[df['Total_Harga'] > 0]
-            st.success(f"✅ {len(df)} transaksi valid dari {original_len} total transaksi")
         else:
             st.error(f"❌ Kolom 'Total_Harga' tidak ada setelah rename!")
-            st.error(f"Kolom yang ada: {df.columns.tolist()}")
-            return None
-        
-        # Convert tanggal
-        try:
-            df['Tanggal'] = pd.to_datetime(df['Tanggal'], errors='coerce')
-            df = df.dropna(subset=['Tanggal'])
-            st.success(f"✅ Tanggal berhasil diparse: {df['Tanggal'].min().strftime('%d/%m/%Y')} - {df['Tanggal'].max().strftime('%d/%m/%Y')}")
-        except Exception as e:
-            st.error(f"❌ Error parsing tanggal: {str(e)}")
             return None
         
         # Bersihkan nama konsumen
         df['Konsumen'] = df['Konsumen'].astype(str).str.strip()
         df = df.dropna(subset=['Total_Harga', 'Konsumen'])
+        
+        st.success(f"✅ Total {len(df)} transaksi valid dari {len(df['Konsumen'].unique())} pelanggan unik")
         
         return df
     
@@ -186,6 +661,8 @@ class AntyLaundryKMeans:
         
         if reference_date is None:
             reference_date = df['Tanggal'].max()
+        
+        st.info(f"📊 Tanggal referensi RFM: {reference_date.strftime('%d/%m/%Y')}")
         
         # Hitung RFM
         if 'No_Invoice' in df.columns:
@@ -212,6 +689,11 @@ class AntyLaundryKMeans:
         
         st.success(f"✅ RFM dihitung untuk {len(rfm)} pelanggan")
         
+        # Debug info
+        st.info(f"📊 Recency: {rfm['Recency'].min():.0f} - {rfm['Recency'].max():.0f} hari")
+        st.info(f"📊 Frequency: {rfm['Frequency'].min():.0f} - {rfm['Frequency'].max():.0f} transaksi")
+        st.info(f"📊 Monetary: Rp {rfm['Monetary'].min():,.0f} - Rp {rfm['Monetary'].max():,.0f}")
+        
         return rfm
     
     def normalize_data(self, rfm_df):
@@ -237,10 +719,14 @@ class AntyLaundryKMeans:
         )
         
         rfm_df['Cluster'] = self.model.fit_predict(X)
+        
+        st.success(f"✅ K-Means clustering selesai dengan {self.n_clusters} cluster")
+        st.info(f"📊 Inertia (WCSS): {self.model.inertia_:.2f}")
+        
         return rfm_df
     
     def label_clusters(self, rfm_df):
-        """Label setiap cluster"""
+        """Label setiap cluster berdasarkan karakteristik RFM"""
         cluster_summary = rfm_df.groupby('Cluster').agg({
             'Recency': 'mean',
             'Frequency': 'mean',
@@ -250,32 +736,38 @@ class AntyLaundryKMeans:
         
         cluster_summary.columns = ['Cluster', 'Avg_Recency', 'Avg_Frequency', 'Avg_Monetary', 'Count']
         
+        # Tampilkan karakteristik tiap cluster
+        st.info("📊 Karakteristik Cluster:")
+        for idx, row in cluster_summary.iterrows():
+            st.write(f"**Cluster {row['Cluster']}**: Recency={row['Avg_Recency']:.0f} hari, Freq={row['Avg_Frequency']:.1f}x, Money=Rp{row['Avg_Monetary']:,.0f}, Count={row['Count']}")
+        
         labels = {}
         for idx, row in cluster_summary.iterrows():
             cluster_id = row['Cluster']
             
-            if row['Avg_Recency'] < 30 and row['Avg_Frequency'] > 50 and row['Avg_Monetary'] > 2000000:
+            # Logika labeling berdasarkan karakteristik RFM
+            if row['Avg_Recency'] < 15 and row['Avg_Frequency'] >= 3 and row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.75):
                 labels[cluster_id] = {
                     'name': 'VIP Champions',
                     'icon': '🏆',
                     'discount': 15,
                     'priority': 1
                 }
-            elif row['Avg_Recency'] < 50 and row['Avg_Frequency'] > 30 and row['Avg_Monetary'] > 1000000:
+            elif row['Avg_Recency'] < 20 and row['Avg_Frequency'] >= 2 and row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.5):
                 labels[cluster_id] = {
                     'name': 'High Value Loyal',
                     'icon': '💎',
                     'discount': 10,
                     'priority': 2
                 }
-            elif row['Avg_Frequency'] > 5 and row['Avg_Monetary'] > 200000:
+            elif row['Avg_Frequency'] >= 2 or row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.3):
                 labels[cluster_id] = {
                     'name': 'Regular Loyal',
                     'icon': '💚',
                     'discount': 5,
                     'priority': 3
                 }
-            elif row['Avg_Recency'] > 200:
+            elif row['Avg_Recency'] > 25:
                 labels[cluster_id] = {
                     'name': 'Sleeping Customers',
                     'icon': '😴',
@@ -299,13 +791,21 @@ class AntyLaundryKMeans:
     
     def get_top_10_customers(self, rfm_df):
         """Pilih TOP 10 pelanggan untuk diskon"""
+        # Prioritas 1: VIP Champions dan High Value Loyal
         top_segments = rfm_df[rfm_df['Segment'].isin(['VIP Champions', 'High Value Loyal'])]
         top_10 = top_segments.nlargest(10, 'Monetary')
         
+        # Jika kurang dari 10, ambil dari Regular Loyal
         if len(top_10) < 10:
             remaining = 10 - len(top_10)
             regular = rfm_df[rfm_df['Segment'] == 'Regular Loyal'].nlargest(remaining, 'Monetary')
             top_10 = pd.concat([top_10, regular])
+        
+        # Jika masih kurang, ambil dari semua cluster berdasarkan Monetary
+        if len(top_10) < 10:
+            remaining = 10 - len(top_10)
+            others = rfm_df[~rfm_df['Konsumen'].isin(top_10['Konsumen'])].nlargest(remaining, 'Monetary')
+            top_10 = pd.concat([top_10, others])
         
         return top_10.head(10)
 
@@ -375,7 +875,7 @@ Terima kasih telah mempercayai ANTY LAUNDRY! 💙
 
 ━━━━━━━━━━━━━━━━
 🧺 ANTY LAUNDRY
-📍 Alamat: [Isi alamat Anda]
+📍 Alamat: [Tomohon]
 📞 Telp: [Isi nomor telepon]
 """
     
@@ -417,44 +917,56 @@ def main():
     # Header
     st.markdown("""
     <div class="main-header">
-        <h1>🧺 ANTY LAUNDRY</h1>
-        <h3>Sistem Segmentasi Pelanggan Berbasis K-Means & RFM Analysis</h3>
-        <p>Otomatisasi Pemberian Diskon untuk Pelanggan Loyal</p>
+        <div class="logo-container">
+            <img src='https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDZqeHY5cWl3bTF1d2p4dDF6NGw1dHUwcG1yb3M2aTl6Nmd3dXZwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/jowM6pSgsD9TwLqwje/giphy.gif' 
+                 class='logo-img'
+                 alt='Gold Fresh Laundry Logo'>
+            <div class="header-text">
+                <h1>🧺 ANTY LAUNDRY</h1>
+                <h3>Sistem Segmentasi Pelanggan - K-Means Clustering</h3>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar dengan GIF Lucu
+    # Sidebar
     with st.sidebar:
-        # GIF LUCU LAUNDRY - INI YANG BARU!
         st.markdown("""
-        <div style='text-align: center; padding: 1rem 0;'>
-            <img src='https://media.giphy.com/media/xT9IgDEI1iZyb2wqo8/giphy.gif' 
-                 style='width: 100%; max-width: 250px; border-radius: 10px;'
-                 alt='Laundry Animation'>
+        <div class="sidebar-logo">
+            <img src='https://i.imgur.com/BP3MK3t.jpeg' 
+                 alt='Gold Fresh Laundry Logo'>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("<h3 style='text-align: center; color: #667eea;'>🧺 ANTY LAUNDRY</h3>", unsafe_allow_html=True)
+        st.markdown("### ⚙️ Pengaturan Analisis")
+        months_back = st.selectbox(
+            "📅 Periode Data:",
+            options=[1, 2, 3, 6, 12],
+            index=0,
+            help="Pilih berapa bulan terakhir yang akan dianalisis"
+        )
+        
+        st.info(f"📊 Data akan difilter: **{months_back} bulan terakhir**")
+        
         st.markdown("---")
         
         st.markdown("### 📋 Panduan Penggunaan")
         st.markdown("""
-        **Step-by-step:**
         1. 📤 Upload file Excel dari kasir
-        2. 🔄 Klik tombol "Jalankan Analisis"
-        3. 📊 Lihat hasil segmentasi pelanggan
+        2. 🔄 Klik "Jalankan Analisis"
+        3. 📊 Lihat hasil segmentasi
         4. 🏆 Cek TOP 10 pelanggan
-        5. 📥 Download laporan Excel
+        5. 📥 Download laporan
         """)
         
         st.markdown("---")
         
         st.markdown("### ℹ️ Informasi Sistem")
         st.info("""
-        **Metode:** K-Means Clustering (k=5)
+        **Metode:** K-Means (k=5)
         
         **RFM Analysis:**
-        - 📅 Recency: Terakhir transaksi
+        - 📅 Recency: Hari sejak transaksi terakhir
         - 🔄 Frequency: Jumlah transaksi
         - 💰 Monetary: Total belanja
         """)
@@ -463,15 +975,15 @@ def main():
         
         st.markdown("### 🎯 Segmen Pelanggan")
         st.markdown("""
-        🏆 **VIP Champions** → 15% diskon  
-        💎 **High Value Loyal** → 10% diskon  
-        💚 **Regular Loyal** → 5% diskon  
-        ⚠️ **At Risk** → 7% diskon  
-        😴 **Sleeping** → 10% diskon
+        🏆 **VIP Champions** → 15%  
+        💎 **High Value Loyal** → 10%  
+        💚 **Regular Loyal** → 5%  
+        ⚠️ **At Risk** → 7%  
+        😴 **Sleeping** → 10%
         """)
         
         st.markdown("---")
-        st.caption("© 2025 Anty Laundry v1.3")
+        st.caption("© 2025 Anty Laundry v2.0")
     
     # Main Content
     st.markdown("## 📤 Upload Data Transaksi")
@@ -490,6 +1002,7 @@ def main():
                 df_raw = pd.read_excel(uploaded_file)
             
             st.success(f"✅ File berhasil dimuat: **{uploaded_file.name}**")
+            st.info(f"📊 Total baris data: {len(df_raw)}")
             
             # Preview data
             with st.expander("👀 Preview Data (10 baris pertama)"):
@@ -502,11 +1015,12 @@ def main():
                     
                     engine = AntyLaundryKMeans()
                     
-                    # Step 1: Clean
-                    st.markdown("### 📊 Step 1: Membersihkan Data")
-                    df_clean = engine.load_and_clean_data(df_raw)
+                    # Step 1: Clean & Filter
+                    st.markdown("### 📊 Step 1: Membersihkan & Filter Data")
+                    df_clean = engine.load_and_clean_data(df_raw, months_back=months_back)
                     
                     if df_clean is None:
+                        st.error("❌ Gagal memproses data!")
                         st.stop()
                     
                     # Step 2: RFM
@@ -514,14 +1028,13 @@ def main():
                     rfm = engine.calculate_rfm(df_clean)
                     
                     # Step 3: Normalize
-                    st.markdown("### 📏 Step 3: Normalisasi Data")
+                    st.markdown("### 🔢 Step 3: Normalisasi Data")
                     rfm = engine.normalize_data(rfm)
                     st.success("✅ Data berhasil dinormalisasi")
                     
                     # Step 4: Clustering
                     st.markdown("### 🤖 Step 4: K-Means Clustering")
                     rfm = engine.run_kmeans(rfm)
-                    st.success("✅ Clustering selesai (k=5)")
                     
                     # Step 5: Label
                     st.markdown("### 🏷️ Step 5: Labeling Cluster")
@@ -663,7 +1176,7 @@ def main():
             st.download_button(
                 label="📊 Download Laporan Excel",
                 data=excel_data,
-                file_name=f"Laporan_Segmentasi_Pelanggan_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                file_name=f"Laporan_Segmentasi_KMeans_{datetime.now().strftime('%Y%m%d')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True
             )
@@ -674,13 +1187,12 @@ def main():
             st.download_button(
                 label="📄 Download TOP 10 (CSV)",
                 data=csv,
-                file_name=f"TOP_10_Pelanggan_{datetime.now().strftime('%Y%m%d')}.csv",
+                file_name=f"TOP_10_KMeans_{datetime.now().strftime('%Y%m%d')}.csv",
                 mime="text/csv",
                 use_container_width=True
             )
         
         with col3:
-            # Generate WhatsApp message
             wa_message = generate_whatsapp_message(top_10)
             wa_link = create_whatsapp_link(wa_message)
             
@@ -714,16 +1226,13 @@ def main():
     # Footer
     st.markdown("---")
     st.markdown("""
-    <div style='text-align: center; color: #666;'>
-        <p>© 2025 Anty Laundry - Sistem Segmentasi Pelanggan</p>
-        <p>Menggunakan K-Means Clustering (k=5) dengan RFM Analysis</p>
+    <div style='text-align: center; padding: 2rem 0; color: #666;'>
+        <p style='margin: 0.5rem 0; font-size: 1rem;'><strong>© 2025 Anty Laundry</strong></p>
+        <p style='margin: 0.5rem 0; font-size: 0.9rem;'>Sistem Segmentasi Pelanggan dengan K-Means Clustering</p>
+        <p style='margin: 0.5rem 0; font-size: 0.85rem; color: #999;'>RFM Analysis • Data 1 Bulan Terakhir</p>
     </div>
     """, unsafe_allow_html=True)
 
-
-# ============================================================
-# RUN
-# ============================================================
 
 if __name__ == "__main__":
     main()
