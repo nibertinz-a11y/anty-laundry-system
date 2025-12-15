@@ -4,7 +4,7 @@ Menggunakan K-Means Clustering & RFM Analysis
 VERSI SKRIPSI - Data 1 Bulan Terakhir
 
 Author: Anty Laundry Team
-Version: 2.0 (K-MEANS + FILTER 1 BULAN)
+Version: 2.1 (FIXED - TOP 10 di atas, WA editable, segment explanation)
 """
 
 import streamlit as st
@@ -27,7 +27,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-# Ganti CSS di bagian st.markdown() dengan kode ini:
 
 st.markdown("""
 <style>
@@ -354,50 +353,6 @@ st.markdown("""
         box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
     }
     
-    /* WhatsApp Button */
-    .stLinkButton>a {
-        background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-        color: white !important;
-        font-weight: 600;
-        border: none;
-        border-radius: 14px;
-        padding: 1rem 1.8rem;
-        text-decoration: none;
-        display: inline-block;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
-    }
-    
-    .stLinkButton>a:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 35px rgba(37, 211, 102, 0.4);
-    }
-    
-    /* Select boxes */
-    div[data-baseweb="select"] {
-        background: rgba(30, 27, 75, 0.5);
-        border-radius: 14px;
-        border: 1px solid rgba(99, 102, 241, 0.3);
-    }
-    
-    div[data-baseweb="select"]:hover {
-        border-color: rgba(99, 102, 241, 0.5);
-    }
-    
-    div[data-baseweb="select"] > div {
-        color: #e5e7eb;
-    }
-    
-    /* Sidebar select boxes - force white text */
-    section[data-testid="stSidebar"] div[data-baseweb="select"] {
-        background: rgba(139, 92, 246, 0.2);
-        border-color: rgba(139, 92, 246, 0.4);
-    }
-    
-    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-        color: #f3f4f6 !important;
-    }
-    
     /* Divider */
     hr {
         margin: 3rem 0;
@@ -450,7 +405,8 @@ st.markdown("""
         border: 1px solid rgba(99, 102, 241, 0.3) !important;
         border-radius: 14px !important;
         color: #e5e7eb !important;
-        font-family: 'Courier New', monospace;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
     }
     
     textarea:focus {
@@ -461,39 +417,6 @@ st.markdown("""
     /* Spinner */
     .stSpinner > div {
         border-top-color: #8b5cf6 !important;
-    }
-    
-    /* Success animation */
-    .stSuccess {
-        animation: slideInUp 0.5s ease-out;
-    }
-    
-    @keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Balloons override for dark theme */
-    .balloon {
-        filter: brightness(1.2);
-    }
-    
-    /* Tabs - if used */
-    button[data-baseweb="tab"] {
-        color: #9ca3af;
-        border-bottom: 2px solid transparent;
-        font-weight: 600;
-    }
-    
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: #a78bfa;
-        border-bottom-color: #a78bfa;
     }
     
     /* Scrollbar */
@@ -607,9 +530,6 @@ class AntyLaundryKMeans:
         # Rename kolom
         df = df.rename(columns=col_mapping)
         
-        # Filter data
-        original_len = len(df)
-        
         # Filter Status Batal
         if 'Status_Order' in df.columns:
             before = len(df)
@@ -626,7 +546,7 @@ class AntyLaundryKMeans:
             st.error(f"❌ Error parsing tanggal: {str(e)}")
             return None
         
-        # 🔴 INI YANG PENTING: FILTER PERIODE (1 BULAN TERAKHIR)
+        # 🔴 FILTER PERIODE (1 BULAN TERAKHIR)
         max_date = df['Tanggal'].max()
         cutoff_date = max_date - timedelta(days=30 * months_back)
         
@@ -751,41 +671,23 @@ class AntyLaundryKMeans:
                     'name': 'VIP Champions',
                     'icon': '🏆',
                     'discount': 15,
-                    'priority': 1
-                }
-            elif row['Avg_Recency'] < 20 and row['Avg_Frequency'] >= 2 and row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.5):
-                labels[cluster_id] = {
-                    'name': 'High Value Loyal',
-                    'icon': '💎',
-                    'discount': 10,
-                    'priority': 2
-                }
-            elif row['Avg_Frequency'] >= 2 or row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.3):
-                labels[cluster_id] = {
-                    'name': 'Regular Loyal',
-                    'icon': '💚',
-                    'discount': 5,
-                    'priority': 3
-                }
-            elif row['Avg_Recency'] > 25:
-                labels[cluster_id] = {
-                    'name': 'Sleeping Customers',
-                    'icon': '😴',
-                    'discount': 10,
-                    'priority': 5
+                    'priority': 1,
+                    'description': 'Pelanggan yang sudah lama tidak bertransaksi. Perlu reaktivasi dengan promo atau reminder untuk kembali menggunakan layanan.'
                 }
             else:
                 labels[cluster_id] = {
                     'name': 'At Risk',
                     'icon': '⚠️',
                     'discount': 7,
-                    'priority': 4
+                    'priority': 4,
+                    'description': 'Pelanggan yang menunjukkan tanda-tanda akan berhenti. Perlu perhatian khusus untuk mencegah churn dan meningkatkan engagement.'
                 }
         
         rfm_df['Segment'] = rfm_df['Cluster'].map(lambda x: labels[x]['name'])
         rfm_df['Icon'] = rfm_df['Cluster'].map(lambda x: labels[x]['icon'])
         rfm_df['Discount'] = rfm_df['Cluster'].map(lambda x: labels[x]['discount'])
         rfm_df['Priority'] = rfm_df['Cluster'].map(lambda x: labels[x]['priority'])
+        rfm_df['Description'] = rfm_df['Cluster'].map(lambda x: labels[x]['description'])
         
         return rfm_df, labels
     
@@ -852,8 +754,8 @@ def create_rfm_3d_scatter(rfm_df):
 # FUNGSI EXPORT & WHATSAPP
 # ============================================================
 
-def generate_whatsapp_message(top_10):
-    """Generate pesan WhatsApp untuk TOP 10 pelanggan"""
+def generate_default_whatsapp_message(top_10):
+    """Generate pesan WhatsApp default untuk TOP 10 pelanggan"""
     message = """🎉 *SELAMAT PELANGGAN SETIA ANTY LAUNDRY!* 🎉
 
 Anda terpilih sebagai TOP 10 pelanggan terbaik bulan ini! 🏆
@@ -873,9 +775,9 @@ Sebagai apresiasi, Anda berhak mendapat DISKON SPESIAL:
 
 Terima kasih telah mempercayai ANTY LAUNDRY! 💙
 
-━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
 🧺 ANTY LAUNDRY
-📍 Alamat: [Tomohon]
+📍 Alamat: Tomohon, Sulawesi Utara
 📞 Telp: [Isi nomor telepon]
 """
     
@@ -920,7 +822,7 @@ def main():
         <div class="logo-container">
             <img src='https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDZqeHY5cWl3bTF1d2p4dDF6NGw1dHUwcG1yb3M2aTl6Nmd3dXZwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/jowM6pSgsD9TwLqwje/giphy.gif' 
                  class='logo-img'
-                 alt='Gold Fresh Laundry Logo'>
+                 alt='Anty Laundry Logo'>
             <div class="header-text">
                 <h1>🧺 ANTY LAUNDRY</h1>
                 <h3>Sistem Segmentasi Pelanggan - K-Means Clustering</h3>
@@ -934,7 +836,7 @@ def main():
         st.markdown("""
         <div class="sidebar-logo">
             <img src='https://i.imgur.com/BP3MK3t.jpeg' 
-                 alt='Gold Fresh Laundry Logo'>
+                 alt='Anty Laundry Logo'>
         </div>
         """, unsafe_allow_html=True)
         
@@ -954,8 +856,8 @@ def main():
         st.markdown("""
         1. 📤 Upload file Excel dari kasir
         2. 🔄 Klik "Jalankan Analisis"
-        3. 📊 Lihat hasil segmentasi
-        4. 🏆 Cek TOP 10 pelanggan
+        3. 🏆 Lihat TOP 10 pelanggan
+        4. ✏️ Edit pesan WhatsApp
         5. 📥 Download laporan
         """)
         
@@ -983,7 +885,7 @@ def main():
         """)
         
         st.markdown("---")
-        st.caption("© 2025 Anty Laundry v2.0")
+        st.caption("© 2025 Anty Laundry v2.1")
     
     # Main Content
     st.markdown("## 📤 Upload Data Transaksi")
@@ -1069,68 +971,11 @@ def main():
         df_clean = st.session_state['df_clean']
         
         st.markdown("---")
-        st.markdown("## 📊 Hasil Analisis")
         
-        # Metrics
-        col1, col2, col3, col4 = st.columns(4)
+        # ============================================================
+        # 🔴 PINDAHKAN TOP 10 KE ATAS (PRIORITAS UTAMA)
+        # ============================================================
         
-        with col1:
-            st.metric("Total Pelanggan", len(rfm))
-        
-        with col2:
-            st.metric("Total Transaksi", len(df_clean))
-        
-        with col3:
-            period = f"{df_clean['Tanggal'].min().strftime('%d/%m/%Y')} - {df_clean['Tanggal'].max().strftime('%d/%m/%Y')}"
-            st.metric("Periode Data", period)
-        
-        with col4:
-            st.metric("Jumlah Cluster", 5)
-        
-        st.markdown("---")
-        
-        # Visualisasi
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.plotly_chart(create_cluster_distribution_chart(rfm), use_container_width=True)
-        
-        with col2:
-            st.plotly_chart(create_rfm_3d_scatter(rfm), use_container_width=True)
-        
-        st.markdown("---")
-        
-        # Detail per Cluster
-        st.markdown("## 🎯 Detail Segmentasi")
-        
-        for cluster_id in sorted(rfm['Cluster'].unique()):
-            cluster_data = rfm[rfm['Cluster'] == cluster_id]
-            label_info = cluster_labels[cluster_id]
-            
-            with st.expander(f"{label_info['icon']} **{label_info['name']}** ({len(cluster_data)} pelanggan)"):
-                
-                col1, col2, col3, col4 = st.columns(4)
-                
-                with col1:
-                    st.metric("Avg Recency", f"{cluster_data['Recency'].mean():.0f} hari")
-                
-                with col2:
-                    st.metric("Avg Frequency", f"{cluster_data['Frequency'].mean():.1f}x")
-                
-                with col3:
-                    st.metric("Avg Monetary", f"Rp {cluster_data['Monetary'].mean():,.0f}")
-                
-                with col4:
-                    st.metric("Diskon", f"{label_info['discount']}%")
-                
-                st.dataframe(
-                    cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
-                    use_container_width=True
-                )
-        
-        st.markdown("---")
-        
-        # TOP 10
         st.markdown("## 🏆 TOP 10 Pelanggan Dapat Diskon Bulan Depan")
         
         st.info("💡 Dipilih otomatis dari segmen **VIP Champions** dan **High Value Loyal** berdasarkan total belanja tertinggi")
@@ -1153,14 +998,36 @@ def main():
             hide_index=True
         )
         
-        st.markdown("---")
+        # ============================================================
+        # 🔴 PESAN WHATSAPP YANG BISA DIEDIT
+        # ============================================================
         
-        # Export & WhatsApp
-        st.markdown("## 📥 Download & Bagikan")
+        st.markdown("### 💬 Kirim Pesan ke Pelanggan")
         
-        col1, col2, col3 = st.columns(3)
+        # Generate default message
+        default_message = generate_default_whatsapp_message(top_10)
+        
+        # Text area yang bisa diedit
+        st.markdown("**✏️ Edit pesan di bawah ini sebelum mengirim:**")
+        edited_message = st.text_area(
+            "Pesan WhatsApp",
+            value=default_message,
+            height=400,
+            help="Edit pesan sesuai kebutuhan, lalu klik tombol di bawah untuk mengirim"
+        )
+        
+        # Tombol kirim dengan pesan yang sudah diedit
+        col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
+            wa_link = create_whatsapp_link(edited_message)
+            st.link_button(
+                label="💬 Kirim ke WhatsApp",
+                url=wa_link,
+                use_container_width=True
+            )
+        
+        with col2:
             cluster_summary = rfm.groupby('Segment').agg({
                 'Konsumen': 'count',
                 'Recency': 'mean',
@@ -1181,7 +1048,7 @@ def main():
                 use_container_width=True
             )
         
-        with col2:
+        with col3:
             csv = top_10[['Konsumen', 'Segment', 'Recency', 'Frequency', 'Monetary', 'Discount']].to_csv(index=False)
             
             st.download_button(
@@ -1192,47 +1059,147 @@ def main():
                 use_container_width=True
             )
         
-        with col3:
-            wa_message = generate_whatsapp_message(top_10)
-            wa_link = create_whatsapp_link(wa_message)
-            
-            st.link_button(
-                label="💬 Bagikan ke WhatsApp",
-                url=wa_link,
-                use_container_width=True
-            )
+        st.markdown("---")
         
-        # Preview pesan WhatsApp
-        with st.expander("👁️ Preview Pesan WhatsApp"):
-            st.text_area(
-                "Pesan yang akan dikirim:",
-                wa_message,
-                height=400,
-                help="Copy pesan ini atau klik tombol 'Bagikan ke WhatsApp' di atas"
-            )
+        # ============================================================
+        # METRICS & VISUALISASI
+        # ============================================================
+        
+        st.markdown("## 📊 Ringkasan Analisis")
+        
+        # Metrics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Total Pelanggan", len(rfm))
+        
+        with col2:
+            st.metric("Total Transaksi", len(df_clean))
+        
+        with col3:
+            period = f"{df_clean['Tanggal'].min().strftime('%d/%m')}-{df_clean['Tanggal'].max().strftime('%d/%m/%Y')}"
+            st.metric("Periode Data", period)
+        
+        with col4:
+            st.metric("Jumlah Cluster", 5)
         
         st.markdown("---")
         
-        # Next Steps
-        st.markdown("## 📋 Langkah Selanjutnya")
+        # Visualisasi
+        col1, col2 = st.columns(2)
         
-        st.success("""
-        ✅ **Simpan laporan** dan berikan ke karyawan  
-        ✅ **Input diskon** untuk 10 pelanggan di kasir laundry1010dry  
-        ✅ **Berlaku mulai** bulan depan  
-        ✅ **Upload data baru** setiap bulan untuk update otomatis
-        """)
+        with col1:
+            st.plotly_chart(create_cluster_distribution_chart(rfm), use_container_width=True)
+        
+        with col2:
+            st.plotly_chart(create_rfm_3d_scatter(rfm), use_container_width=True)
+        
+        st.markdown("---")
+        
+        # ============================================================
+        # 🔴 DETAIL SEGMEN DENGAN PENJELASAN
+        # ============================================================
+        
+        st.markdown("## 🎯 Detail Segmentasi Pelanggan")
+        
+        st.info("📌 **Penjelasan:** Setiap segmen dipilih berdasarkan pola RFM (Recency, Frequency, Monetary). Klik untuk melihat detail pelanggan di setiap segmen.")
+        
+        for cluster_id in sorted(rfm['Cluster'].unique()):
+            cluster_data = rfm[rfm['Cluster'] == cluster_id]
+            label_info = cluster_labels[cluster_id]
+            
+            with st.expander(f"{label_info['icon']} **{label_info['name']}** ({len(cluster_data)} pelanggan) - Diskon {label_info['discount']}%"):
+                
+                # Tampilkan deskripsi
+                st.markdown(f"**📝 Deskripsi:** {label_info['description']}")
+                
+                st.markdown("---")
+                
+                # Metrics
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.metric("Rata-rata Recency", f"{cluster_data['Recency'].mean():.0f} hari")
+                
+                with col2:
+                    st.metric("Rata-rata Frequency", f"{cluster_data['Frequency'].mean():.1f}x")
+                
+                with col3:
+                    st.metric("Rata-rata Monetary", f"Rp {cluster_data['Monetary'].mean():,.0f}")
+                
+                with col4:
+                    st.metric("Diskon", f"{label_info['discount']}%")
+                
+                # Tabel pelanggan
+                st.markdown("**👥 Daftar Pelanggan:**")
+                st.dataframe(
+                    cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
+                    use_container_width=True
+                )
+        
+        st.markdown("---")
+        
+        # ============================================================
+        # PANDUAN UNTUK OWNER
+        # ============================================================
+        
+        st.markdown("## 📋 Panduan untuk Owner")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.success("""
+            **✅ Langkah Selanjutnya:**
+            1. Edit pesan WhatsApp di atas
+            2. Klik "Kirim ke WhatsApp"
+            3. Download laporan Excel
+            4. Input diskon di kasir
+            5. Berlaku mulai bulan depan
+            """)
+        
+        with col2:
+            st.warning("""
+            **💡 Tips:**
+            - Periksa nama pelanggan sebelum kirim
+            - Pastikan nomor telepon sudah benar
+            - Simpan laporan untuk dokumentasi
+            - Upload data baru setiap bulan
+            """)
     
     # Footer
     st.markdown("---")
     st.markdown("""
-    <div style='text-align: center; padding: 2rem 0; color: #666;'>
+    <div style='text-align: center; padding: 2rem 0; color: #999;'>
         <p style='margin: 0.5rem 0; font-size: 1rem;'><strong>© 2025 Anty Laundry</strong></p>
         <p style='margin: 0.5rem 0; font-size: 0.9rem;'>Sistem Segmentasi Pelanggan dengan K-Means Clustering</p>
-        <p style='margin: 0.5rem 0; font-size: 0.85rem; color: #999;'>RFM Analysis • Data 1 Bulan Terakhir</p>
+        <p style='margin: 0.5rem 0; font-size: 0.85rem; color: #666;'>RFM Analysis • Data 1 Bulan Terakhir • v2.1</p>
     </div>
     """, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
-    main()
+    main()gan terbaik dengan transaksi sering, baru-baru ini, dan nilai tinggi. Mereka adalah aset berharga yang harus dipertahankan dengan pelayanan terbaik.'
+                }
+            elif row['Avg_Recency'] < 20 and row['Avg_Frequency'] >= 2 and row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.5):
+                labels[cluster_id] = {
+                    'name': 'High Value Loyal',
+                    'icon': '💎',
+                    'discount': 10,
+                    'priority': 2,
+                    'description': 'Pelanggan setia dengan nilai transaksi tinggi. Mereka sering kembali dan berkontribusi besar pada revenue. Berpotensi naik ke VIP Champions.'
+                }
+            elif row['Avg_Frequency'] >= 2 or row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.3):
+                labels[cluster_id] = {
+                    'name': 'Regular Loyal',
+                    'icon': '💚',
+                    'discount': 5,
+                    'priority': 3,
+                    'description': 'Pelanggan reguler yang konsisten bertransaksi. Mereka adalah basis pelanggan yang stabil dan dapat ditingkatkan loyalitasnya dengan program khusus.'
+                }
+            elif row['Avg_Recency'] > 25:
+                labels[cluster_id] = {
+                    'name': 'Sleeping Customers',
+                    'icon': '😴',
+                    'discount': 10,
+                    'priority': 5,
+                    'description': 'Pelang
