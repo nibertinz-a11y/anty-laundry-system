@@ -4,7 +4,7 @@ Menggunakan K-Means Clustering & RFM Analysis
 VERSI SKRIPSI - Data 1 Bulan Terakhir
 
 Author: Anty Laundry Team
-Version: 2.0 (K-MEANS + FILTER 1 BULAN)
+Version: 2.1 (FIXED: Adi & Filke masuk, TOP 10 di atas, WA editable, penjelasan segmen)
 """
 
 import streamlit as st
@@ -27,7 +27,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-# Ganti CSS di bagian st.markdown() dengan kode ini:
 
 st.markdown("""
 <style>
@@ -373,31 +372,6 @@ st.markdown("""
         box-shadow: 0 12px 35px rgba(37, 211, 102, 0.4);
     }
     
-    /* Select boxes */
-    div[data-baseweb="select"] {
-        background: rgba(30, 27, 75, 0.5);
-        border-radius: 14px;
-        border: 1px solid rgba(99, 102, 241, 0.3);
-    }
-    
-    div[data-baseweb="select"]:hover {
-        border-color: rgba(99, 102, 241, 0.5);
-    }
-    
-    div[data-baseweb="select"] > div {
-        color: #e5e7eb;
-    }
-    
-    /* Sidebar select boxes - force white text */
-    section[data-testid="stSidebar"] div[data-baseweb="select"] {
-        background: rgba(139, 92, 246, 0.2);
-        border-color: rgba(139, 92, 246, 0.4);
-    }
-    
-    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-        color: #f3f4f6 !important;
-    }
-    
     /* Divider */
     hr {
         margin: 3rem 0;
@@ -450,7 +424,7 @@ st.markdown("""
         border: 1px solid rgba(99, 102, 241, 0.3) !important;
         border-radius: 14px !important;
         color: #e5e7eb !important;
-        font-family: 'Courier New', monospace;
+        font-family: 'Inter', monospace;
     }
     
     textarea:focus {
@@ -461,39 +435,6 @@ st.markdown("""
     /* Spinner */
     .stSpinner > div {
         border-top-color: #8b5cf6 !important;
-    }
-    
-    /* Success animation */
-    .stSuccess {
-        animation: slideInUp 0.5s ease-out;
-    }
-    
-    @keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Balloons override for dark theme */
-    .balloon {
-        filter: brightness(1.2);
-    }
-    
-    /* Tabs - if used */
-    button[data-baseweb="tab"] {
-        color: #9ca3af;
-        border-bottom: 2px solid transparent;
-        font-weight: 600;
-    }
-    
-    button[data-baseweb="tab"][aria-selected="true"] {
-        color: #a78bfa;
-        border-bottom-color: #a78bfa;
     }
     
     /* Scrollbar */
@@ -532,13 +473,11 @@ class AntyLaundryKMeans:
         
     def find_column(self, df, keywords):
         """Mencari kolom berdasarkan keyword - prioritas exact match"""
-        # Coba exact match dulu
         for keyword in keywords:
             for col in df.columns:
                 if str(col).lower().strip() == keyword.lower():
                     return col
         
-        # Kalau tidak ada, coba partial match
         for keyword in keywords:
             keyword_clean = keyword.lower().replace(' ', '').replace('_', '')
             for col in df.columns:
@@ -546,7 +485,6 @@ class AntyLaundryKMeans:
                 if keyword_clean == col_clean:
                     return col
         
-        # Terakhir, coba contains
         for keyword in keywords:
             keyword_clean = keyword.lower().replace(' ', '').replace('_', '')
             for col in df.columns:
@@ -562,10 +500,8 @@ class AntyLaundryKMeans:
         
         st.info("🔍 Mencari kolom yang dibutuhkan...")
         
-        # Auto-detect kolom
         col_mapping = {}
         
-        # Cari kolom Tanggal Ambil
         tanggal_col = self.find_column(df, ['tanggal ar', 'tanggal ambil', 'tgl ambil', 'tanggalambil'])
         if tanggal_col:
             col_mapping[tanggal_col] = 'Tanggal'
@@ -574,7 +510,6 @@ class AntyLaundryKMeans:
             st.error("❌ Kolom 'Tanggal Ambil' tidak ditemukan!")
             return None
         
-        # Cari kolom Konsumen
         konsumen_col = self.find_column(df, ['konsumer', 'konsumen', 'customer', 'pelanggan'])
         if konsumen_col:
             col_mapping[konsumen_col] = 'Konsumen'
@@ -583,7 +518,6 @@ class AntyLaundryKMeans:
             st.error("❌ Kolom 'Konsumen' tidak ditemukan!")
             return None
         
-        # Cari kolom Total Harga
         harga_col = self.find_column(df, ['total harg', 'total harga', 'totalharga'])
         if harga_col:
             col_mapping[harga_col] = 'Total_Harga'
@@ -592,41 +526,46 @@ class AntyLaundryKMeans:
             st.error("❌ Kolom 'Total Harga' tidak ditemukan!")
             return None
         
-        # Cari kolom Invoice/Nota
         invoice_col = self.find_column(df, ['nota', 'invoice', 'no nota', 'nonota', 'no.nota'])
         if invoice_col:
             col_mapping[invoice_col] = 'No_Invoice'
             st.success(f"✅ No Invoice: **{invoice_col}** → No_Invoice")
         
-        # Cari kolom Status Order
         status_col = self.find_column(df, ['status order', 'statusorder', 'status'])
         if status_col:
             col_mapping[status_col] = 'Status_Order'
             st.success(f"✅ Status Order: **{status_col}** → Status_Order")
         
-        # Rename kolom
+        tanggal_order_col = self.find_column(df, ['tanggal order', 'tanggalorder', 'tgl order'])
+        if tanggal_order_col:
+            col_mapping[tanggal_order_col] = 'Tanggal_Order'
+            st.success(f"✅ Tanggal Order: **{tanggal_order_col}** → Tanggal_Order")
+        
         df = df.rename(columns=col_mapping)
         
-        # Filter data
-        original_len = len(df)
-        
-        # Filter Status Batal
+        # 🔴 PERBAIKAN 1: Hanya filter BATAL, sisanya tetap dihitung (termasuk piutang)
         if 'Status_Order' in df.columns:
             before = len(df)
-            df = df[df['Status_Order'].astype(str).str.lower() != 'batal']
+            df = df[~df['Status_Order'].astype(str).str.lower().str.contains('batal', na=False)]
             after = len(df)
             if before > after:
-                st.warning(f"⚠️ {before - after} transaksi batal dihapus")
+                st.warning(f"⚠️ {before - after} transaksi BATAL dihapus")
         
-        # Convert tanggal DULU sebelum filter
+        # Parse tanggal
         try:
             df['Tanggal'] = pd.to_datetime(df['Tanggal'], errors='coerce')
+            
+            # Jika ada Tanggal Order, gunakan sebagai backup
+            if 'Tanggal_Order' in df.columns:
+                df['Tanggal_Order'] = pd.to_datetime(df['Tanggal_Order'], errors='coerce')
+                df['Tanggal'] = df['Tanggal'].fillna(df['Tanggal_Order'])
+            
             df = df.dropna(subset=['Tanggal'])
         except Exception as e:
             st.error(f"❌ Error parsing tanggal: {str(e)}")
             return None
         
-        # 🔴 INI YANG PENTING: FILTER PERIODE (1 BULAN TERAKHIR)
+        # Filter periode
         max_date = df['Tanggal'].max()
         cutoff_date = max_date - timedelta(days=30 * months_back)
         
@@ -664,7 +603,6 @@ class AntyLaundryKMeans:
         
         st.info(f"📊 Tanggal referensi RFM: {reference_date.strftime('%d/%m/%Y')}")
         
-        # Hitung RFM
         if 'No_Invoice' in df.columns:
             rfm = df.groupby('Konsumen').agg({
                 'Tanggal': lambda x: (reference_date - x.max()).days,
@@ -681,7 +619,6 @@ class AntyLaundryKMeans:
         
         rfm.columns = ['Konsumen', 'Recency', 'Frequency', 'Monetary']
         
-        # Convert to numeric
         rfm['Recency'] = pd.to_numeric(rfm['Recency'], errors='coerce')
         rfm['Frequency'] = pd.to_numeric(rfm['Frequency'], errors='coerce')
         rfm['Monetary'] = pd.to_numeric(rfm['Monetary'], errors='coerce')
@@ -689,7 +626,6 @@ class AntyLaundryKMeans:
         
         st.success(f"✅ RFM dihitung untuk {len(rfm)} pelanggan")
         
-        # Debug info
         st.info(f"📊 Recency: {rfm['Recency'].min():.0f} - {rfm['Recency'].max():.0f} hari")
         st.info(f"📊 Frequency: {rfm['Frequency'].min():.0f} - {rfm['Frequency'].max():.0f} transaksi")
         st.info(f"📊 Monetary: Rp {rfm['Monetary'].min():,.0f} - Rp {rfm['Monetary'].max():,.0f}")
@@ -736,72 +672,74 @@ class AntyLaundryKMeans:
         
         cluster_summary.columns = ['Cluster', 'Avg_Recency', 'Avg_Frequency', 'Avg_Monetary', 'Count']
         
-        # Tampilkan karakteristik tiap cluster
         st.info("📊 Karakteristik Cluster:")
         for idx, row in cluster_summary.iterrows():
             st.write(f"**Cluster {row['Cluster']}**: Recency={row['Avg_Recency']:.0f} hari, Freq={row['Avg_Frequency']:.1f}x, Money=Rp{row['Avg_Monetary']:,.0f}, Count={row['Count']}")
         
+        # 🔴 PERBAIKAN 4: Tambah deskripsi lengkap untuk setiap segmen
         labels = {}
         for idx, row in cluster_summary.iterrows():
             cluster_id = row['Cluster']
             
-            # Logika labeling berdasarkan karakteristik RFM
             if row['Avg_Recency'] < 15 and row['Avg_Frequency'] >= 3 and row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.75):
                 labels[cluster_id] = {
                     'name': 'VIP Champions',
                     'icon': '🏆',
                     'discount': 15,
-                    'priority': 1
+                    'priority': 1,
+                    'description': 'Pelanggan terbaik dengan transaksi sering, baru-baru ini bertransaksi, dan nilai belanja sangat tinggi. Mereka adalah aset paling berharga yang harus dipertahankan dengan pelayanan VIP dan reward eksklusif.'
                 }
             elif row['Avg_Recency'] < 20 and row['Avg_Frequency'] >= 2 and row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.5):
                 labels[cluster_id] = {
                     'name': 'High Value Loyal',
                     'icon': '💎',
                     'discount': 10,
-                    'priority': 2
+                    'priority': 2,
+                    'description': 'Pelanggan setia dengan nilai transaksi tinggi dan frekuensi baik. Mereka sering kembali dan berkontribusi besar pada revenue. Dengan perhatian lebih, mereka berpotensi naik menjadi VIP Champions.'
                 }
             elif row['Avg_Frequency'] >= 2 or row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.3):
                 labels[cluster_id] = {
                     'name': 'Regular Loyal',
                     'icon': '💚',
                     'discount': 5,
-                    'priority': 3
+                    'priority': 3,
+                    'description': 'Pelanggan reguler yang konsisten bertransaksi. Mereka adalah basis pelanggan yang stabil dan dapat ditingkatkan loyalitasnya dengan program khusus dan komunikasi rutin.'
                 }
             elif row['Avg_Recency'] > 25:
                 labels[cluster_id] = {
                     'name': 'Sleeping Customers',
                     'icon': '😴',
                     'discount': 10,
-                    'priority': 5
+                    'priority': 5,
+                    'description': 'Pelanggan yang sudah lama tidak bertransaksi. Perlu strategi reaktivasi dengan promo menarik, reminder personal, atau special offer untuk membuat mereka kembali menggunakan layanan.'
                 }
             else:
                 labels[cluster_id] = {
                     'name': 'At Risk',
                     'icon': '⚠️',
                     'discount': 7,
-                    'priority': 4
+                    'priority': 4,
+                    'description': 'Pelanggan yang menunjukkan tanda-tanda akan berhenti. Mereka perlu perhatian khusus dan komunikasi intensif untuk mencegah churn dan meningkatkan engagement kembali.'
                 }
         
         rfm_df['Segment'] = rfm_df['Cluster'].map(lambda x: labels[x]['name'])
         rfm_df['Icon'] = rfm_df['Cluster'].map(lambda x: labels[x]['icon'])
         rfm_df['Discount'] = rfm_df['Cluster'].map(lambda x: labels[x]['discount'])
         rfm_df['Priority'] = rfm_df['Cluster'].map(lambda x: labels[x]['priority'])
+        rfm_df['Description'] = rfm_df['Cluster'].map(lambda x: labels[x]['description'])
         
         return rfm_df, labels
     
     def get_top_10_customers(self, rfm_df):
         """Pilih TOP 10 pelanggan untuk diskon"""
-        # Prioritas 1: VIP Champions dan High Value Loyal
         top_segments = rfm_df[rfm_df['Segment'].isin(['VIP Champions', 'High Value Loyal'])]
         top_10 = top_segments.nlargest(10, 'Monetary')
         
-        # Jika kurang dari 10, ambil dari Regular Loyal
         if len(top_10) < 10:
             remaining = 10 - len(top_10)
             regular = rfm_df[rfm_df['Segment'] == 'Regular Loyal'].nlargest(remaining, 'Monetary')
             top_10 = pd.concat([top_10, regular])
         
-        # Jika masih kurang, ambil dari semua cluster berdasarkan Monetary
         if len(top_10) < 10:
             remaining = 10 - len(top_10)
             others = rfm_df[~rfm_df['Konsumen'].isin(top_10['Konsumen'])].nlargest(remaining, 'Monetary')
@@ -852,8 +790,8 @@ def create_rfm_3d_scatter(rfm_df):
 # FUNGSI EXPORT & WHATSAPP
 # ============================================================
 
-def generate_whatsapp_message(top_10):
-    """Generate pesan WhatsApp untuk TOP 10 pelanggan"""
+def generate_default_whatsapp_message(top_10):
+    """Generate pesan WhatsApp default untuk TOP 10 pelanggan"""
     message = """🎉 *SELAMAT PELANGGAN SETIA ANTY LAUNDRY!* 🎉
 
 Anda terpilih sebagai TOP 10 pelanggan terbaik bulan ini! 🏆
@@ -873,9 +811,9 @@ Sebagai apresiasi, Anda berhak mendapat DISKON SPESIAL:
 
 Terima kasih telah mempercayai ANTY LAUNDRY! 💙
 
-━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━
 🧺 ANTY LAUNDRY
-📍 Alamat: [Tomohon]
+📍 Alamat: Tomohon, Sulawesi Utara
 📞 Telp: [Isi nomor telepon]
 """
     
@@ -891,17 +829,14 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
     output = BytesIO()
     
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        # Sheet 1: Top 10
         top_10_export = top_10[['Konsumen', 'Segment', 'Recency', 'Frequency', 'Monetary', 'Discount']].copy()
         top_10_export.columns = ['Nama Pelanggan', 'Segmen', 'Recency (hari)', 'Frequency (x)', 'Total Belanja (Rp)', 'Diskon (%)']
         top_10_export.to_excel(writer, sheet_name='Top 10 Pelanggan', index=False)
         
-        # Sheet 2: Semua Pelanggan
         all_customers = rfm_df[['Konsumen', 'Segment', 'Recency', 'Frequency', 'Monetary', 'Discount']].copy()
         all_customers.columns = ['Nama Pelanggan', 'Segmen', 'Recency (hari)', 'Frequency (x)', 'Total Belanja (Rp)', 'Diskon (%)']
         all_customers.to_excel(writer, sheet_name='Semua Pelanggan', index=False)
         
-        # Sheet 3: Ringkasan
         cluster_summary.to_excel(writer, sheet_name='Ringkasan Cluster', index=False)
     
     output.seek(0)
@@ -914,13 +849,12 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
 
 def main():
     
-    # Header
     st.markdown("""
     <div class="main-header">
         <div class="logo-container">
             <img src='https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDZqeHY5cWl3bTF1d2p4dDF6NGw1dHUwcG1yb3M2aTl6Nmd3dXZwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/jowM6pSgsD9TwLqwje/giphy.gif' 
                  class='logo-img'
-                 alt='Gold Fresh Laundry Logo'>
+                 alt='Anty Laundry Logo'>
             <div class="header-text">
                 <h1>🧺 ANTY LAUNDRY</h1>
                 <h3>Sistem Segmentasi Pelanggan - K-Means Clustering</h3>
@@ -929,12 +863,11 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar
     with st.sidebar:
         st.markdown("""
         <div class="sidebar-logo">
             <img src='https://i.imgur.com/BP3MK3t.jpeg' 
-                 alt='Gold Fresh Laundry Logo'>
+                 alt='Anty Laundry Logo'>
         </div>
         """, unsafe_allow_html=True)
         
@@ -954,8 +887,8 @@ def main():
         st.markdown("""
         1. 📤 Upload file Excel dari kasir
         2. 🔄 Klik "Jalankan Analisis"
-        3. 📊 Lihat hasil segmentasi
-        4. 🏆 Cek TOP 10 pelanggan
+        3. 🏆 Lihat TOP 10 pelanggan
+        4. ✏️ Edit pesan WhatsApp
         5. 📥 Download laporan
         """)
         
@@ -969,6 +902,8 @@ def main():
         - 📅 Recency: Hari sejak transaksi terakhir
         - 🔄 Frequency: Jumlah transaksi
         - 💰 Monetary: Total belanja
+        
+        **Catatan:** Semua transaksi dihitung kecuali yang batal
         """)
         
         st.markdown("---")
@@ -983,9 +918,8 @@ def main():
         """)
         
         st.markdown("---")
-        st.caption("© 2025 Anty Laundry v2.0")
+        st.caption("© 2025 Anty Laundry v2.1")
     
-    # Main Content
     st.markdown("## 📤 Upload Data Transaksi")
     
     uploaded_file = st.file_uploader(
@@ -1004,18 +938,15 @@ def main():
             st.success(f"✅ File berhasil dimuat: **{uploaded_file.name}**")
             st.info(f"📊 Total baris data: {len(df_raw)}")
             
-            # Preview data
             with st.expander("👀 Preview Data (10 baris pertama)"):
                 st.dataframe(df_raw.head(10))
             
-            # Tombol proses
             if st.button("🚀 Jalankan Analisis K-Means", type="primary", use_container_width=True):
                 
                 with st.spinner("⏳ Sedang memproses data..."):
                     
                     engine = AntyLaundryKMeans()
                     
-                    # Step 1: Clean & Filter
                     st.markdown("### 📊 Step 1: Membersihkan & Filter Data")
                     df_clean = engine.load_and_clean_data(df_raw, months_back=months_back)
                     
@@ -1023,30 +954,24 @@ def main():
                         st.error("❌ Gagal memproses data!")
                         st.stop()
                     
-                    # Step 2: RFM
                     st.markdown("### 🔢 Step 2: Menghitung RFM")
                     rfm = engine.calculate_rfm(df_clean)
                     
-                    # Step 3: Normalize
                     st.markdown("### 🔢 Step 3: Normalisasi Data")
                     rfm = engine.normalize_data(rfm)
                     st.success("✅ Data berhasil dinormalisasi")
                     
-                    # Step 4: Clustering
                     st.markdown("### 🤖 Step 4: K-Means Clustering")
                     rfm = engine.run_kmeans(rfm)
                     
-                    # Step 5: Label
                     st.markdown("### 🏷️ Step 5: Labeling Cluster")
                     rfm, cluster_labels = engine.label_clusters(rfm)
                     st.success("✅ Cluster berhasil dilabeli")
                     
-                    # Step 6: Top 10
                     st.markdown("### 🏆 Step 6: Memilih TOP 10")
                     top_10 = engine.get_top_10_customers(rfm)
                     st.success(f"✅ {len(top_10)} pelanggan terpilih")
                     
-                    # Save to session
                     st.session_state['rfm_result'] = rfm
                     st.session_state['top_10'] = top_10
                     st.session_state['cluster_labels'] = cluster_labels
@@ -1060,7 +985,7 @@ def main():
             st.exception(e)
             st.stop()
     
-    # Display Results
+    # 🔴 PERBAIKAN 2: Tampilkan TOP 10 DI ATAS (setelah analisis selesai)
     if 'rfm_result' in st.session_state:
         
         rfm = st.session_state['rfm_result']
@@ -1069,29 +994,6 @@ def main():
         df_clean = st.session_state['df_clean']
         
         st.markdown("---")
-        st.markdown("## 📊 Hasil Analisis")
-        
-        # Metrics
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric("Total Pelanggan", len(rfm))
-        
-        with col2:
-            st.metric("Total Transaksi", len(df_clean))
-        
-        with col3:
-            period = f"{df_clean['Tanggal'].min().strftime('%d/%m/%Y')} - {df_clean['Tanggal'].max().strftime('%d/%m/%Y')}"
-            st.metric("Periode Data", period)
-        
-        with col4:
-            st.metric("Jumlah Cluster", 5)
-        
-        st.markdown("---")
-        
-        # ============================================================
-        # FEEDBACK #2: TOP 10 DIPINDAH KE ATAS (SETELAH METRICS)
-        # ============================================================
         
         st.markdown("## 🏆 TOP 10 Pelanggan Dapat Diskon Bulan Depan")
         
@@ -1117,16 +1019,30 @@ def main():
         
         st.markdown("---")
         
-        # ============================================================
-        # FEEDBACK #2 & #3: EXPORT & WHATSAPP DIPINDAH KE ATAS
-        # FEEDBACK #3: WHATSAPP MESSAGE BISA DIEDIT
-        # ============================================================
+        # 🔴 PERBAIKAN 3: Pesan WhatsApp yang bisa diedit
+        st.markdown("## 💬 Kirim Pesan ke Pelanggan")
         
-        st.markdown("## 📥 Download & Bagikan")
+        default_message = generate_default_whatsapp_message(top_10)
         
-        col1, col2, col3 = st.columns(3)
+        st.markdown("**✏️ Edit pesan di bawah ini sebelum mengirim:**")
+        edited_message = st.text_area(
+            "Pesan WhatsApp",
+            value=default_message,
+            height=400,
+            help="Edit pesan sesuai kebutuhan, lalu klik tombol di bawah untuk mengirim"
+        )
+        
+        col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
+            wa_link = create_whatsapp_link(edited_message)
+            st.link_button(
+                label="💬 Kirim ke WhatsApp",
+                url=wa_link,
+                use_container_width=True
+            )
+        
+        with col2:
             cluster_summary = rfm.groupby('Segment').agg({
                 'Konsumen': 'count',
                 'Recency': 'mean',
@@ -1147,7 +1063,7 @@ def main():
                 use_container_width=True
             )
         
-        with col2:
+        with col3:
             csv = top_10[['Konsumen', 'Segment', 'Recency', 'Frequency', 'Monetary', 'Discount']].to_csv(index=False)
             
             st.download_button(
@@ -1158,45 +1074,27 @@ def main():
                 use_container_width=True
             )
         
-        with col3:
-            # Initialize WhatsApp message in session state
-            if 'wa_message' not in st.session_state:
-                st.session_state['wa_message'] = generate_whatsapp_message(top_10)
-            
-            wa_link = create_whatsapp_link(st.session_state['wa_message'])
-            
-            st.link_button(
-                label="💬 Bagikan ke WhatsApp",
-                url=wa_link,
-                use_container_width=True
-            )
+        st.markdown("---")
         
-        # FEEDBACK #3: Preview & Edit pesan WhatsApp (BISA DIEDIT!)
-        with st.expander("✏️ Edit & Preview Pesan WhatsApp"):
-            st.markdown("**Edit pesan di bawah, lalu klik tombol WhatsApp di atas untuk membagikan:**")
-            
-            # Editable text area
-            edited_message = st.text_area(
-                "Pesan WhatsApp:",
-                value=st.session_state['wa_message'],
-                height=400,
-                help="Edit pesan ini sesuai kebutuhan Anda",
-                key='wa_message_editor'
-            )
-            
-            # Update session state when message is edited
-            if edited_message != st.session_state['wa_message']:
-                st.session_state['wa_message'] = edited_message
-                st.info("✏️ Pesan telah diubah. Klik tombol 'Bagikan ke WhatsApp' di atas untuk mengirim pesan yang sudah diedit.")
-            
-            # Reset button
-            if st.button("🔄 Reset ke Template Awal"):
-                st.session_state['wa_message'] = generate_whatsapp_message(top_10)
-                st.rerun()
+        st.markdown("## 📊 Hasil Analisis")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Total Pelanggan", len(rfm))
+        
+        with col2:
+            st.metric("Total Transaksi", len(df_clean))
+        
+        with col3:
+            period = f"{df_clean['Tanggal'].min().strftime('%d/%m/%Y')} - {df_clean['Tanggal'].max().strftime('%d/%m/%Y')}"
+            st.metric("Periode Data", period)
+        
+        with col4:
+            st.metric("Jumlah Cluster", 5)
         
         st.markdown("---")
         
-        # Visualisasi
         col1, col2 = st.columns(2)
         
         with col1:
@@ -1207,91 +1105,37 @@ def main():
         
         st.markdown("---")
         
-        # ============================================================
-        # FEEDBACK #4: DETAIL SEGMENTASI DENGAN PENJELASAN LENGKAP
-        # ============================================================
-        
+        # 🔴 PERBAIKAN 4: Detail Segmen dengan Penjelasan Lengkap
         st.markdown("## 🎯 Detail Segmentasi")
         
-        st.info("""
-        💡 **Penjelasan Sistem Segmentasi:**
-        
-        Sistem ini membagi pelanggan ke dalam 5 segmen berdasarkan 3 metrik (RFM):
-        - **R (Recency)**: Berapa hari sejak transaksi terakhir (semakin kecil = semakin baik)
-        - **F (Frequency)**: Jumlah transaksi dalam periode (semakin banyak = semakin baik)  
-        - **M (Monetary)**: Total belanja dalam periode (semakin tinggi = semakin baik)
-        
-        **Catatan:** Beberapa cluster bisa memiliki nama segmen yang sama (misal: VIP Champions di Cluster 0 dan Cluster 2) 
-        karena algoritma K-Means mengelompokkan berdasarkan pola RFM yang mirip.
-        """)
+        st.info("📌 **Penjelasan Segmen:** Setiap segmen memiliki karakteristik RFM yang berbeda. Klik untuk melihat detail pelanggan di setiap segmen beserta strategi yang disarankan.")
         
         for cluster_id in sorted(rfm['Cluster'].unique()):
             cluster_data = rfm[rfm['Cluster'] == cluster_id]
             label_info = cluster_labels[cluster_id]
             
-            with st.expander(f"{label_info['icon']} **{label_info['name']}** (Cluster {cluster_id}) - {len(cluster_data)} pelanggan"):
+            with st.expander(f"{label_info['icon']} **{label_info['name']}** ({len(cluster_data)} pelanggan) - Diskon {label_info['discount']}%"):
                 
-                # FEEDBACK #4: Tambahkan penjelasan karakteristik
-                st.markdown("### 📝 Karakteristik Segmen Ini:")
+                st.markdown(f"**📝 Deskripsi:**")
+                st.info(label_info['description'])
                 
-                avg_r = cluster_data['Recency'].mean()
-                avg_f = cluster_data['Frequency'].mean()
-                avg_m = cluster_data['Monetary'].mean()
-                
-                if label_info['name'] == 'VIP Champions':
-                    st.success("""
-                    **Pelanggan paling berharga!** 🌟
-                    - Transaksi sangat sering (Frequency tinggi)
-                    - Baru transaksi belum lama (Recency rendah)
-                    - Total belanja sangat tinggi (Monetary tinggi)
-                    - Pelanggan paling loyal dan menguntungkan
-                    """)
-                elif label_info['name'] == 'High Value Loyal':
-                    st.success("""
-                    **Pelanggan loyal dengan nilai tinggi** 💎
-                    - Transaksi cukup sering
-                    - Masih aktif bertransaksi
-                    - Total belanja di atas rata-rata
-                    - Berpotensi menjadi VIP Champions
-                    """)
-                elif label_info['name'] == 'Regular Loyal':
-                    st.info("""
-                    **Pelanggan reguler yang stabil** 💚
-                    - Transaksi reguler/cukup sering
-                    - Total belanja moderate
-                    - Pelanggan yang perlu dijaga
-                    - Bisa naik ke High Value dengan strategi yang tepat
-                    """)
-                elif label_info['name'] == 'Sleeping Customers':
-                    st.warning("""
-                    **Pelanggan yang perlu reaktivasi** 😴
-                    - Sudah lama tidak transaksi (Recency tinggi)
-                    - Perlu kampanye untuk menarik kembali
-                    - Diskon tinggi untuk reaktivasi
-                    - Risiko kehilangan pelanggan tinggi
-                    """)
-                else:  # At Risk
-                    st.warning("""
-                    **Pelanggan berisiko hilang** ⚠️
-                    - Aktivitas menurun
-                    - Perlu perhatian khusus
-                    - Diskon untuk mendorong transaksi kembali
-                    """)
+                st.markdown("---")
                 
                 col1, col2, col3, col4 = st.columns(4)
                 
                 with col1:
-                    st.metric("Avg Recency", f"{avg_r:.0f} hari")
+                    st.metric("Avg Recency", f"{cluster_data['Recency'].mean():.0f} hari")
                 
                 with col2:
-                    st.metric("Avg Frequency", f"{avg_f:.1f}x")
+                    st.metric("Avg Frequency", f"{cluster_data['Frequency'].mean():.1f}x")
                 
                 with col3:
-                    st.metric("Avg Monetary", f"Rp {avg_m:,.0f}")
+                    st.metric("Avg Monetary", f"Rp {cluster_data['Monetary'].mean():,.0f}")
                 
                 with col4:
                     st.metric("Diskon", f"{label_info['discount']}%")
                 
+                st.markdown("**👥 Daftar Pelanggan:**")
                 st.dataframe(
                     cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
                     use_container_width=True
@@ -1299,7 +1143,6 @@ def main():
         
         st.markdown("---")
         
-        # Next Steps
         st.markdown("## 📋 Langkah Selanjutnya")
         
         st.success("""
@@ -1308,61 +1151,7 @@ def main():
         ✅ **Berlaku mulai** bulan depan  
         ✅ **Upload data baru** setiap bulan untuk update otomatis
         """)
-        
-        st.markdown("---")
-        
-        # ============================================================
-        # FEEDBACK #1: FAQ - KENAPA PELANGGAN TIDAK MUNCUL?
-        # ============================================================
-        
-        st.markdown("## ❓ FAQ - Kenapa Pelanggan Tertentu Tidak Muncul di TOP 10?")
-        
-        st.warning("""
-        **Jika pelanggan seperti Adi, Filke, atau lainnya tidak muncul di TOP 10, berikut kemungkinan penyebabnya:**
-        
-        ### 1️⃣ Tidak Ada Transaksi dalam Periode yang Dipilih
-        - Sistem hanya menganalisis data sesuai periode di sidebar (default: 1 bulan terakhir)
-        - Jika pelanggan tidak transaksi dalam periode tersebut, mereka tidak akan muncul
-        - **Solusi:** Coba gunakan periode lebih panjang (2-3 bulan) di pengaturan sidebar
-        
-        ### 2️⃣ Tidak Masuk TOP 10 Berdasarkan Total Belanja
-        - TOP 10 dipilih dari segmen **VIP Champions** dan **High Value Loyal** saja
-        - Diurutkan berdasarkan **total belanja (Monetary) tertinggi**
-        - Mungkin ada 10 pelanggan lain dengan total belanja lebih tinggi
-        - **Solusi:** Cek di bagian "Detail Segmentasi" di atas untuk melihat posisi mereka
-        
-        ### 3️⃣ Tidak Termasuk Segmen VIP/High Value
-        - Sistem memprioritaskan pelanggan dari 2 segmen teratas saja
-        - Jika pelanggan ada di segmen Regular Loyal, Sleeping, atau At Risk, mereka tidak prioritas TOP 10
-        - **Solusi:** Lihat di expander "Detail Segmentasi" untuk menemukan pelanggan di segmen lain
-        
-        ### 💡 Tips:
-        - Pastikan nama pelanggan di Excel sudah benar dan konsisten
-        - Gunakan periode analisis lebih panjang jika diperlukan
-        - Cek semua segmen untuk melihat distribusi pelanggan lengkap
-        """)
-        
-        # Show all customers in expandable section for verification
-        with st.expander("🔍 Lihat Semua Pelanggan (untuk verifikasi)"):
-            st.markdown("**Cari nama pelanggan di sini:**")
-            search_name = st.text_input("Ketik nama pelanggan untuk mencari:", key="search_customer")
-            
-            display_rfm = rfm[['Konsumen', 'Segment', 'Recency', 'Frequency', 'Monetary', 'Discount']].copy()
-            display_rfm = display_rfm.sort_values('Monetary', ascending=False)
-            display_rfm['Ranking'] = range(1, len(display_rfm) + 1)
-            display_rfm = display_rfm[['Ranking', 'Konsumen', 'Segment', 'Recency', 'Frequency', 'Monetary', 'Discount']]
-            
-            if search_name:
-                filtered = display_rfm[display_rfm['Konsumen'].str.contains(search_name, case=False, na=False)]
-                if len(filtered) > 0:
-                    st.success(f"✅ Ditemukan {len(filtered)} pelanggan:")
-                    st.dataframe(filtered, use_container_width=True, hide_index=True)
-                else:
-                    st.error(f"❌ Tidak ada pelanggan dengan nama '{search_name}'")
-            else:
-                st.dataframe(display_rfm, use_container_width=True, hide_index=True)
     
-    # Footer
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; padding: 2rem 0; color: #666;'>
