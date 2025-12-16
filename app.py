@@ -981,7 +981,7 @@ def main():
                     rfm = engine.run_kmeans(rfm)
                     
                     st.markdown("### 🏷️ Step 5: Labeling Cluster")
-                    rfm, cluster_labels = engine.label_clusters(rfm)
+                    rfm = engine.label_clusters(rfm)  # ✅ BENAR - hanya 1 return
                     st.success("✅ Cluster berhasil dilabeli")
                     
                     st.markdown("### 🏆 Step 6: Memilih TOP 10")
