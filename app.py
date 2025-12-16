@@ -1035,26 +1035,12 @@ def main():
         col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
-            # Generate link dengan pesan yang sudah diedit
             wa_link = create_whatsapp_link(edited_message)
-    
-            # Gunakan HTML link agar selalu update
-            st.markdown(f"""
-            <a href="{wa_link}" target="_blank" style="
-                display: inline-block;
-                background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-                color: white !important;
-                padding: 1rem 1.8rem;
-                border-radius: 14px;
-                text-decoration: none;
-                font-weight: 600;
-                text-align: center;
-                width: 100%;
-                box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
-            ">
-                💬 Kirim ke WhatsApp
-            </a>
-            """, unsafe_allow_html=True)
+            st.link_button(
+                label="💬 Kirim ke WhatsApp",
+                url=wa_link,
+                use_container_width=True
+            )
         
         with col2:
             cluster_summary = rfm.groupby('Segment').agg({
