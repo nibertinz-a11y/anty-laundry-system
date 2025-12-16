@@ -1029,20 +1029,24 @@ def main():
             "Pesan WhatsApp",
             value=default_message,
             height=400,
-            help="Edit pesan sesuai kebutuhan, lalu klik tombol di bawah untuk mengirim"
+            help="Edit pesan sesuai kebutuhan, lalu klik tombol di bawah untuk mengirim",
+            key="wa_message_editor"
         )
         
         col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
+            # Generate link WhatsApp secara dinamis menggunakan JavaScript
             wa_link = create_whatsapp_link(edited_message)
             
             st.markdown(f"""
-            <a href="{wa_link}" target="_blank" style="
+            <a href="{wa_link}" target="_blank" 
+               onclick="this.href = 'https://wa.me/?text=' + encodeURIComponent(document.querySelector('textarea[aria-label=\\'Pesan WhatsApp\\']').value); return true;"
+               style="
                 display: inline-block;
                 width: 100%;
                 background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-                color: white;
+                color: white !important;
                 font-weight: 600;
                 border: none;
                 border-radius: 14px;
@@ -1178,6 +1182,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
