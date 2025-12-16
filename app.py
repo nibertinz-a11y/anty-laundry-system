@@ -1035,7 +1035,7 @@ def main():
         col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
-        wa_link = create_whatsapp_link(edited_message)
+            wa_link = create_whatsapp_link(edited_message)
             
             st.markdown(f"""
             <a href="{wa_link}" target="_blank" style="
@@ -1178,6 +1178,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
