@@ -1022,43 +1022,36 @@ def main():
         # 🔴 PERBAIKAN 3: Pesan WhatsApp yang bisa diedit
         st.markdown("## 💬 Kirim Pesan ke Pelanggan")
         
-        default_message = generate_default_whatsapp_message(top_10)
+        # Inisialisasi session state untuk pesan
+        if 'wa_message' not in st.session_state:
+            st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
         
         st.markdown("**✏️ Edit pesan di bawah ini sebelum mengirim:**")
+        
+        # Text area untuk edit pesan
         edited_message = st.text_area(
             "Pesan WhatsApp",
-            value=default_message,
+            value=st.session_state['wa_message'],
             height=400,
             help="Edit pesan sesuai kebutuhan, lalu klik tombol di bawah untuk mengirim",
             key="wa_message_editor"
         )
         
+        # Update session state setiap kali ada perubahan
+        st.session_state['wa_message'] = edited_message
+        
         col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
-            # Generate link WhatsApp secara dinamis menggunakan JavaScript
-            wa_link = create_whatsapp_link(edited_message)
+            # Generate link WhatsApp dengan pesan TERBARU dari session state
+            wa_link = create_whatsapp_link(st.session_state['wa_message'])
             
-            st.markdown(f"""
-            <a href="{wa_link}" target="_blank" 
-               onclick="this.href = 'https://wa.me/?text=' + encodeURIComponent(document.querySelector('textarea[aria-label=\\'Pesan WhatsApp\\']').value); return true;"
-               style="
-                display: inline-block;
-                width: 100%;
-                background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-                color: white !important;
-                font-weight: 600;
-                border: none;
-                border-radius: 14px;
-                padding: 1rem 1.8rem;
-                text-decoration: none;
-                text-align: center;
-                box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
-                transition: all 0.3s ease;
-            ">
-                💬 Kirim ke WhatsApp
-            </a>
-            """, unsafe_allow_html=True)
+            st.link_button(
+                "💬 Kirim ke WhatsApp",
+                wa_link,
+                use_container_width=True,
+                type="primary"
+            )
         
         with col2:
             cluster_summary = rfm.groupby('Segment').agg({
@@ -1182,6 +1175,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
