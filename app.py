@@ -1035,26 +1035,26 @@ def main():
         col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
-        wa_link = create_whatsapp_link(edited_message)
-    
-        st.markdown(f"""
-        <a href="{wa_link}" target="_blank" style="
-            display: inline-block;
-            width: 100%;
-            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-            color: white;
-            font-weight: 600;
-            border: none;
-            border-radius: 14px;
-            padding: 1rem 1.8rem;
-            text-decoration: none;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
-            transition: all 0.3s ease;
-        ">
-            💬 Kirim ke WhatsApp
-        </a>
-        """, unsafe_allow_html=True)
+wa_link = create_whatsapp_link(edited_message)
+            
+            st.markdown(f"""
+            <a href="{wa_link}" target="_blank" style="
+                display: inline-block;
+                width: 100%;
+                background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+                color: white;
+                font-weight: 600;
+                border: none;
+                border-radius: 14px;
+                padding: 1rem 1.8rem;
+                text-decoration: none;
+                text-align: center;
+                box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+                transition: all 0.3s ease;
+            ">
+                💬 Kirim ke WhatsApp
+            </a>
+            """, unsafe_allow_html=True)
         
         with col2:
             cluster_summary = rfm.groupby('Segment').agg({
@@ -1178,4 +1178,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
