@@ -1026,24 +1026,27 @@ def main():
         if 'wa_message' not in st.session_state:
             st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
         
-        st.markdown("**✏️ Edit pesan di bawah ini sebelum mengirim:**")
+        st.markdown("**✏️ Edit pesan di bawah ini, lalu klik 'Update Pesan' sebelum mengirim:**")
         
         # Text area untuk edit pesan
         edited_message = st.text_area(
             "Pesan WhatsApp",
             value=st.session_state['wa_message'],
             height=400,
-            help="Edit pesan sesuai kebutuhan, lalu klik tombol di bawah untuk mengirim",
+            help="Edit pesan sesuai kebutuhan",
             key="wa_message_editor"
         )
         
-        # Update session state setiap kali ada perubahan
-        st.session_state['wa_message'] = edited_message
+        # Tombol untuk update pesan
+        if st.button("🔄 Update Pesan", use_container_width=True, help="Klik ini setelah selesai edit untuk menyimpan perubahan"):
+            st.session_state['wa_message'] = edited_message
+            st.success("✅ Pesan berhasil diupdate! Sekarang bisa kirim ke WhatsApp.")
+            st.rerun()
         
         col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
-            # Generate link WhatsApp dengan pesan TERBARU dari session state
+            # Generate link WhatsApp dengan pesan dari session state
             wa_link = create_whatsapp_link(st.session_state['wa_message'])
             
             st.link_button(
@@ -1052,6 +1055,10 @@ def main():
                 use_container_width=True,
                 type="primary"
             )
+            
+            # Tampilkan preview pesan yang akan dikirim
+            with st.expander("👁️ Preview Pesan"):
+                st.text(st.session_state['wa_message'][:200] + "..." if len(st.session_state['wa_message']) > 200 else st.session_state['wa_message'])
         
         with col2:
             cluster_summary = rfm.groupby('Segment').agg({
@@ -1175,6 +1182,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
