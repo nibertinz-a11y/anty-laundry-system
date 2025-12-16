@@ -1056,9 +1056,6 @@ def main():
                 type="primary"
             )
             
-            # Tampilkan preview pesan yang akan dikirim
-            with st.expander("👁️ Preview Pesan"):
-                st.text(st.session_state['wa_message'][:200] + "..." if len(st.session_state['wa_message']) > 200 else st.session_state['wa_message'])
         
         with col2:
             cluster_summary = rfm.groupby('Segment').agg({
@@ -1182,6 +1179,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
