@@ -1012,14 +1012,17 @@ def main():
                 
                 st.success("✅ Analisis selesai!")
                 st.balloons()
+                st.rerun() 
         
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
             st.exception(e)
             st.stop()
     
-    # 🔴 PERBAIKAN 2: Tampilkan TOP 10 DI ATAS (setelah analisis selesai)
-    if 'rfm_result' in st.session_state:
+# ============================================================
+# TAMPILKAN HASIL UTAMA DI ATAS (TOP 10 + ACTIONS)
+# ============================================================
+if 'rfm_result' in st.session_state:
         
         rfm = st.session_state['rfm_result']
         top_10 = st.session_state['top_10']
@@ -1027,59 +1030,115 @@ def main():
         df_clean = st.session_state['df_clean']
         
         st.markdown("---")
+        st.markdown("---")
         
+        # ============================================================
+        # 1. RINGKASAN CEPAT (4 Metrics)
+        # ============================================================
+        st.markdown("## 📊 Ringkasan Hasil Analisis")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Total Pelanggan", len(rfm))
+        
+        with col2:
+            st.metric("Total Transaksi", len(df_clean))
+        
+        with col3:
+            period = f"{df_clean['Tanggal'].min().strftime('%d/%m')} - {df_clean['Tanggal'].max().strftime('%d/%m/%Y')}"
+            st.metric("Periode Data", period)
+        
+        with col4:
+            vip_count = len(rfm[rfm['Segment'] == 'VIP Champions'])
+            st.metric("VIP Champions", vip_count, delta="🏆")
+        
+        st.markdown("---")
+        
+        # ============================================================
+        # 2. TOP 10 PELANGGAN - HIGHLIGHT BOX
+        # ============================================================
         st.markdown("## 🏆 TOP 10 Pelanggan Dapat Diskon Bulan Depan")
         
-        st.info("💡 Dipilih otomatis dari segmen **VIP Champions** dan **High Value Loyal** berdasarkan total belanja tertinggi")
+        st.success("💡 **Dipilih otomatis** dari segmen VIP Champions & High Value Loyal berdasarkan total belanja tertinggi")
         
+        # Tabel TOP 10 yang lebih menarik
         top_10_display = top_10.copy()
-        top_10_display['Rank'] = range(1, len(top_10_display) + 1)
+        top_10_display['Rank'] = ['🥇', '🥈', '🥉'] + [f'#{i}' for i in range(4, 11)]
         top_10_display['Monetary_Formatted'] = top_10_display['Monetary'].apply(lambda x: f"Rp {x:,.0f}")
+        top_10_display['Discount_Badge'] = top_10_display['Discount'].apply(lambda x: f"🎁 {x}%")
         
         st.dataframe(
-            top_10_display[['Rank', 'Konsumen', 'Segment', 'Frequency', 'Monetary_Formatted', 'Discount']]
+            top_10_display[['Rank', 'Konsumen', 'Segment', 'Frequency', 'Monetary_Formatted', 'Discount_Badge']]
             .rename(columns={
-                'Rank': '#',
+                'Rank': '🏅',
                 'Konsumen': 'Nama Pelanggan',
                 'Segment': 'Segmen',
                 'Frequency': 'Transaksi',
                 'Monetary_Formatted': 'Total Belanja',
-                'Discount': 'Diskon (%)'
+                'Discount_Badge': 'Diskon'
             }),
             use_container_width=True,
-            hide_index=True
+            hide_index=True,
+            height=400
         )
         
         st.markdown("---")
         
-        # 🔴 PERBAIKAN 3: Pesan WhatsApp yang bisa diedit
-        st.markdown("## 💬 Kirim Pesan ke Pelanggan")
+        # ============================================================
+        # 3. EDIT PESAN WHATSAPP
+        # ============================================================
+        st.markdown("## 💬 Kirim Notifikasi ke Pelanggan")
         
-        # Inisialisasi session state untuk pesan
-        if 'wa_message' not in st.session_state:
-            st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
+        col_left, col_right = st.columns([2, 1])
         
-        st.markdown("**✏️ Edit pesan di bawah ini, lalu klik 'Update Pesan' sebelum mengirim:**")
+        with col_left:
+            # Inisialisasi session state untuk pesan
+            if 'wa_message' not in st.session_state:
+                st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
+            
+            st.markdown("**✏️ Edit pesan di bawah, lalu klik 'Update Pesan':**")
+            
+            # Text area untuk edit pesan
+            edited_message = st.text_area(
+                "Pesan WhatsApp",
+                value=st.session_state['wa_message'],
+                height=350,
+                help="Edit pesan sesuai kebutuhan, lalu klik Update Pesan",
+                key="wa_message_editor"
+            )
+            
+            # Tombol update
+            if st.button("🔄 Update Pesan", use_container_width=True, help="Klik setelah edit untuk menyimpan"):
+                st.session_state['wa_message'] = edited_message
+                st.success("✅ Pesan berhasil diupdate!")
+                st.rerun()
         
-        # Text area untuk edit pesan
-        edited_message = st.text_area(
-            "Pesan WhatsApp",
-            value=st.session_state['wa_message'],
-            height=400,
-            help="Edit pesan sesuai kebutuhan",
-            key="wa_message_editor"
-        )
+        with col_right:
+            st.markdown("**📱 Preview:**")
+            st.info(f"Pesan akan dikirim dengan {len(st.session_state['wa_message'])} karakter")
+            
+            st.markdown("**👥 Target:**")
+            st.metric("Jumlah Penerima", "10 pelanggan")
+            
+            st.markdown("**💰 Total Diskon:**")
+            total_discount_value = sum([
+                row['Monetary'] * row['Discount'] / 100 
+                for _, row in top_10.iterrows()
+            ])
+            st.metric("Estimasi Nilai", f"Rp {total_discount_value:,.0f}")
         
-        # Tombol untuk update pesan
-        if st.button("🔄 Update Pesan", use_container_width=True, help="Klik ini setelah selesai edit untuk menyimpan perubahan"):
-            st.session_state['wa_message'] = edited_message
-            st.success("✅ Pesan berhasil diupdate! Sekarang bisa kirim ke WhatsApp.")
-            st.rerun()
+        st.markdown("---")
         
-        col1, col2, col3 = st.columns([1, 1, 1])
+        # ============================================================
+        # 4. ACTION BUTTONS (SHARE & DOWNLOAD)
+        # ============================================================
+        st.markdown("## 📤 Bagikan & Download Laporan")
+        
+        col1, col2, col3 = st.columns(3)
         
         with col1:
-            # Generate link WhatsApp dengan pesan dari session state
+            # Generate link WhatsApp
             wa_link = create_whatsapp_link(st.session_state['wa_message'])
             
             st.link_button(
@@ -1088,7 +1147,6 @@ def main():
                 use_container_width=True,
                 type="primary"
             )
-            
         
         with col2:
             cluster_summary = rfm.groupby('Segment').agg({
@@ -1123,83 +1181,69 @@ def main():
             )
         
         st.markdown("---")
-        
-        st.markdown("## 📊 Hasil Analisis")
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric("Total Pelanggan", len(rfm))
-        
-        with col2:
-            st.metric("Total Transaksi", len(df_clean))
-        
-        with col3:
-            period = f"{df_clean['Tanggal'].min().strftime('%d/%m/%Y')} - {df_clean['Tanggal'].max().strftime('%d/%m/%Y')}"
-            st.metric("Periode Data", period)
-        
-        with col4:
-            st.metric("Jumlah Cluster", 5)
-        
         st.markdown("---")
         
-        col1, col2 = st.columns(2)
+        # ============================================================
+        # 5. DETAIL ANALISIS (OPSIONAL - DI BAWAH)
+        # ============================================================
         
-        with col1:
-            st.plotly_chart(create_cluster_distribution_chart(rfm), use_container_width=True)
-        
-        with col2:
-            st.plotly_chart(create_rfm_3d_scatter(rfm), use_container_width=True)
-        
-        st.markdown("---")
-        
-        st.markdown("## 🎯 Detail Segmentasi")
-        
-        st.info("📌 **Penjelasan Segmen:** Setiap segmen memiliki karakteristik RFM yang berbeda. Klik untuk melihat detail pelanggan di setiap segmen beserta strategi yang disarankan.")
-        
-        for cluster_id in sorted(rfm['Cluster'].unique()):
-            cluster_data = rfm[rfm['Cluster'] == cluster_id]
-            label_info = cluster_labels[cluster_id]
+        with st.expander("📈 **Lihat Visualisasi & Detail Analisis Lengkap**", expanded=False):
             
-            with st.expander(f"{label_info['icon']} **{label_info['name']}** ({len(cluster_data)} pelanggan) - Diskon {label_info['discount']}%"):
+            st.markdown("### 📊 Distribusi Segmen")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.plotly_chart(create_cluster_distribution_chart(rfm), use_container_width=True)
+            
+            with col2:
+                st.plotly_chart(create_rfm_3d_scatter(rfm), use_container_width=True)
+            
+            st.markdown("---")
+            
+            st.markdown("### 🎯 Detail 5 Segmentasi Pelanggan")
+            
+            st.info("📌 **Penjelasan:** Setiap segmen memiliki karakteristik RFM berbeda. Klik untuk lihat detail pelanggan & strategi.")
+            
+            for cluster_id in sorted(rfm['Cluster'].unique()):
+                cluster_data = rfm[rfm['Cluster'] == cluster_id]
+                label_info = cluster_labels[cluster_id]
                 
-                st.markdown("**📝 Deskripsi Segmen:**")
-                st.info(label_info['description'])
-                
-                st.markdown("**🎯 Kriteria & Karakteristik:**")
-                st.code(label_info['criteria'], language=None)
-                
-                st.markdown("---")
-                
-                col1, col2, col3, col4 = st.columns(4)
-                
-                with col1:
-                    st.metric("Avg Recency", f"{cluster_data['Recency'].mean():.0f} hari")
-                
-                with col2:
-                    st.metric("Avg Frequency", f"{cluster_data['Frequency'].mean():.1f}x")
-                
-                with col3:
-                    st.metric("Avg Monetary", f"Rp {cluster_data['Monetary'].mean():,.0f}")
-                
-                with col4:
-                    st.metric("Diskon", f"{label_info['discount']}%")
-                
-                st.markdown("**👥 Daftar Pelanggan:**")
-                st.dataframe(
-                    cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
-                    use_container_width=True
-                )
+                with st.expander(f"{label_info['icon']} **{label_info['name']}** ({len(cluster_data)} pelanggan) - Diskon {label_info['discount']}%"):
+                    
+                    st.markdown("**📝 Deskripsi Segmen:**")
+                    st.info(label_info['description'])
+                    
+                    st.markdown("**🎯 Kriteria & Karakteristik:**")
+                    st.code(label_info['criteria'], language=None)
+                    
+                    st.markdown("---")
+                    
+                    col1, col2, col3, col4 = st.columns(4)
+                    
+                    with col1:
+                        st.metric("Avg Recency", f"{cluster_data['Recency'].mean():.0f} hari")
+                    
+                    with col2:
+                        st.metric("Avg Frequency", f"{cluster_data['Frequency'].mean():.1f}x")
+                    
+                    with col3:
+                        st.metric("Avg Monetary", f"Rp {cluster_data['Monetary'].mean():,.0f}")
+                    
+                    with col4:
+                        st.metric("Diskon", f"{label_info['discount']}%")
+                    
+                    st.markdown("**👥 Daftar Pelanggan:**")
+                    st.dataframe(
+                        cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
+                        use_container_width=True
+                    )
         
         st.markdown("---")
-        
-        st.success("""
-        ✅ **Simpan laporan** dan berikan ke karyawan  
-        ✅ **Input diskon** untuk 10 pelanggan di kasir laundry1010dry  
-        ✅ **Berlaku mulai** bulan depan  
-        ✅ **Upload data baru** setiap bulan untuk update otomatis
-        """)
-    
+```
+
+---
+
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; padding: 2rem 0; color: #666;'>
@@ -1212,6 +1256,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
