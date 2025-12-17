@@ -65,13 +65,13 @@ st.markdown("""
         }
     }
     
-    /* Hero Header - RESPONSIVE */
+    /* Hero Header - OPTIMIZED FOR MOBILE */
     .main-header {
         background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-        padding: 1.5rem 1.5rem;
+        padding: 1.2rem 1rem;
         border-radius: 16px;
         color: white;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
         position: relative;
         overflow: hidden;
@@ -98,27 +98,24 @@ st.markdown("""
     .logo-container {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.8rem;
         position: relative;
         z-index: 1;
-        flex-wrap: wrap;
-        justify-content: center;
-        text-align: center;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
     }
     
     @media (min-width: 768px) {
         .logo-container {
             gap: 2.5rem;
-            flex-wrap: nowrap;
             justify-content: flex-start;
-            text-align: left;
         }
     }
     
     .logo-img {
-        height: 60px;
-        width: 60px;
-        border-radius: 16px;
+        height: 55px;
+        width: 55px;
+        border-radius: 14px;
         background: white;
         padding: 8px;
         box-shadow: 0 15px 40px rgba(0,0,0,0.3);
@@ -141,46 +138,51 @@ st.markdown("""
     }
     
     .header-text h1 {
-        margin: 0 0 0.3rem 0;
-        font-size: 1.8rem;
+        margin: 0 0 0.2rem 0;
+        font-size: 1.5rem;
         font-weight: 900;
-        letter-spacing: -1px;
-        line-height: 1.2;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
     }
     
     @media (min-width: 768px) {
         .header-text h1 {
             font-size: 2.8rem;
             letter-spacing: -1.5px;
-            line-height: 1.1;
+            margin: 0 0 0.3rem 0;
         }
     }
     
     .header-text h3 {
-        margin: 0 0 0.5rem 0;
-        font-size: 0.95rem;
+        margin: 0;
+        font-size: 0.8rem;
         font-weight: 500;
-        opacity: 0.95;
-        letter-spacing: 0.2px;
+        opacity: 0.9;
+        letter-spacing: 0.1px;
+        line-height: 1.3;
     }
     
     @media (min-width: 768px) {
         .header-text h3 {
             font-size: 1.2rem;
             letter-spacing: 0.3px;
+            margin: 0 0 0.5rem 0;
         }
     }
     
     .header-text p {
         margin: 0;
-        font-size: 0.85rem;
-        opacity: 0.85;
+        font-size: 0.75rem;
+        opacity: 0.8;
         font-weight: 400;
+        display: none;
     }
     
     @media (min-width: 768px) {
         .header-text p {
+            display: block;
             font-size: 0.95rem;
+            opacity: 0.85;
         }
     }
     
@@ -323,13 +325,22 @@ st.markdown("""
         }
     }
     
-    /* Alert boxes - Modern */
+    /* Alert boxes - MOBILE OPTIMIZED */
     .stAlert {
-        border-radius: 16px;
+        border-radius: 12px;
         border: none;
         backdrop-filter: blur(10px);
         font-weight: 500;
-        padding: 1.2rem 1.5rem;
+        padding: 0.9rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    @media (min-width: 768px) {
+        .stAlert {
+            border-radius: 16px;
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
+        }
     }
     
     div[data-baseweb="notification"][kind="info"] {
@@ -428,13 +439,20 @@ st.markdown("""
         }
     }
     
-    /* File Uploader - Hero Style */
+    /* File Uploader - MOBILE OPTIMIZED */
     section[data-testid="stFileUploadDropzone"] {
         background: rgba(99, 102, 241, 0.08);
-        border-radius: 24px;
-        padding: 3rem;
+        border-radius: 16px;
+        padding: 1.5rem 1rem;
         border: 2px dashed rgba(139, 92, 246, 0.4);
         transition: all 0.3s ease;
+    }
+    
+    @media (min-width: 768px) {
+        section[data-testid="stFileUploadDropzone"] {
+            border-radius: 24px;
+            padding: 3rem;
+        }
     }
     
     section[data-testid="stFileUploadDropzone"]:hover {
@@ -447,8 +465,27 @@ st.markdown("""
         color: white;
         border: none;
         border-radius: 12px;
-        padding: 0.9rem 2rem;
+        padding: 0.9rem 1.5rem;
         font-weight: 600;
+        font-size: 0.95rem;
+    }
+    
+    @media (min-width: 768px) {
+        section[data-testid="stFileUploadDropzone"] button {
+            padding: 0.9rem 2rem;
+            font-size: 1rem;
+        }
+    }
+    
+    /* File uploader text - smaller on mobile */
+    section[data-testid="stFileUploadDropzone"] small {
+        font-size: 0.75rem;
+    }
+    
+    @media (min-width: 768px) {
+        section[data-testid="stFileUploadDropzone"] small {
+            font-size: 0.85rem;
+        }
     }
     
     /* Download & WhatsApp Buttons - RESPONSIVE */
@@ -505,12 +542,18 @@ st.markdown("""
         box-shadow: 0 12px 35px rgba(37, 211, 102, 0.4);
     }
     
-    /* Divider */
+    /* Divider - less margin on mobile */
     hr {
-        margin: 3rem 0;
+        margin: 2rem 0;
         border: none;
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
+    }
+    
+    @media (min-width: 768px) {
+        hr {
+            margin: 3rem 0;
+        }
     }
     
     /* Plotly Charts - Floating Effect */
@@ -522,16 +565,16 @@ st.markdown("""
         background: rgba(30, 27, 75, 0.3);
     }
     
-    /* Headings - RESPONSIVE */
+    /* Headings - MOBILE OPTIMIZED */
     h1, h2, h3, h4, h5, h6 {
         color: #f3f4f6;
     }
     
     h2 {
         font-weight: 800;
-        font-size: 1.6rem;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
+        font-size: 1.4rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.8rem;
         background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -551,7 +594,7 @@ st.markdown("""
     h3 {
         color: #c4b5fd;
         font-weight: 700;
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
     
     @media (min-width: 768px) {
@@ -563,13 +606,14 @@ st.markdown("""
     /* Paragraphs */
     p {
         color: #d1d5db;
-        line-height: 1.7;
-        font-size: 0.9rem;
+        line-height: 1.6;
+        font-size: 0.85rem;
     }
     
     @media (min-width: 768px) {
         p {
             font-size: 1rem;
+            line-height: 1.7;
         }
     }
     
@@ -1228,10 +1272,10 @@ def main():
             top_10_display[['Rank', 'Konsumen', 'Segment', 'Frequency', 'Monetary_Formatted', 'Discount_Badge']]
             .rename(columns={
                 'Rank': '🏅',
-                'Konsumen': 'Nama Pelanggan',
+                'Konsumen': 'Nama',
                 'Segment': 'Segmen',
-                'Frequency': 'Transaksi',
-                'Monetary_Formatted': 'Total Belanja',
+                'Frequency': 'Trx',
+                'Monetary_Formatted': 'Total',
                 'Discount_Badge': 'Diskon'
             }),
             use_container_width=True,
