@@ -661,7 +661,7 @@ class AntyLaundryKMeans:
         
         return rfm_df
     
-def label_clusters(self, rfm_df):
+    def label_clusters(self, rfm_df):
         """Label setiap cluster berdasarkan karakteristik RFM dengan RFM Score"""
         cluster_summary = rfm_df.groupby('Cluster').agg({
             'Recency': 'mean',
@@ -1212,6 +1212,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
