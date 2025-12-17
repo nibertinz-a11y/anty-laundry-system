@@ -543,7 +543,7 @@ class AntyLaundryKMeans:
         
         df = df.rename(columns=col_mapping)
         
-        # 🔴 PERBAIKAN 1: Hanya filter BATAL, sisanya tetap dihitung (termasuk piutang)
+        # Filter BATAL
         if 'Status_Order' in df.columns:
             before = len(df)
             df = df[~df['Status_Order'].astype(str).str.lower().str.contains('batal', na=False)]
@@ -555,7 +555,6 @@ class AntyLaundryKMeans:
         try:
             df['Tanggal'] = pd.to_datetime(df['Tanggal'], errors='coerce')
             
-            # Jika ada Tanggal Order, gunakan sebagai backup
             if 'Tanggal_Order' in df.columns:
                 df['Tanggal_Order'] = pd.to_datetime(df['Tanggal_Order'], errors='coerce')
                 df['Tanggal'] = df['Tanggal'].fillna(df['Tanggal_Order'])
@@ -692,66 +691,61 @@ class AntyLaundryKMeans:
         for idx, row in cluster_summary.iterrows():
             st.write(f"**Cluster {row['Cluster']}**: Score={row['RFM_Score']:.2f}, Recency={row['Avg_Recency']:.0f} hari, Freq={row['Avg_Frequency']:.1f}x, Money=Rp{row['Avg_Monetary']:,.0f}, Count={row['Count']}")
         
-        # Labeling berdasarkan RANKING, bukan kondisi overlapping
+        # Labeling berdasarkan RANKING
         labels = {}
         
         for idx, row in cluster_summary.iterrows():
             cluster_id = row['Cluster']
-            rank = idx + 1  # Ranking dari terbaik (1) ke terburuk (5)
+            rank = idx + 1
             
             if rank == 1:
-                # Cluster terbaik (RFM Score tertinggi)
                 labels[cluster_id] = {
                     'name': 'VIP Champions',
                     'icon': '🏆',
                     'discount': 15,
                     'priority': 1,
-                    'description': f'Pelanggan TERBAIK dengan RFM Score tertinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka adalah aset paling berharga - pertahankan dengan pelayanan VIP, reward eksklusif, dan komunikasi personal.',
-                    'criteria': f'✓ Ranking #1 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (tertinggi)\n✓ Recency: {row["Avg_Recency"]:.0f} hari (sangat baru)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+                    'description': f'Pelanggan TERBAIK dengan RFM Score tertinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu.',
+                    'criteria': f'✓ Ranking #1 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (tertinggi)\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
                 }
             
             elif rank == 2:
-                # Cluster kedua terbaik
                 labels[cluster_id] = {
                     'name': 'High Value Loyal',
                     'icon': '💎',
                     'discount': 10,
                     'priority': 2,
-                    'description': f'Pelanggan SETIA dengan RFM Score tinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka loyal dan berkontribusi besar - tingkatkan engagement untuk naik ke VIP Champions.',
-                    'criteria': f'✓ Ranking #2 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+                    'description': f'Pelanggan SETIA dengan RFM Score tinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x.',
+                    'criteria': f'✓ Ranking #2\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
                 }
             
             elif rank == 3:
-                # Cluster menengah
                 labels[cluster_id] = {
                     'name': 'Regular Loyal',
                     'icon': '💚',
                     'discount': 5,
                     'priority': 3,
-                    'description': f'Pelanggan REGULER dengan RFM Score menengah ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka adalah basis pelanggan stabil - tingkatkan dengan promo rutin dan program loyalitas.',
-                    'criteria': f'✓ Ranking #3 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (menengah)\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+                    'description': f'Pelanggan REGULER dengan RFM Score menengah ({row["RFM_Score"]:.2f}/3.0).',
+                    'criteria': f'✓ Ranking #3\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x'
                 }
             
             elif rank == 4:
-                # Cluster keempat - at risk
                 labels[cluster_id] = {
                     'name': 'At Risk',
                     'icon': '⚠️',
                     'discount': 7,
                     'priority': 4,
-                    'description': f'Pelanggan BERISIKO dengan RFM Score rendah ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka menunjukkan tanda akan berhenti - butuh perhatian khusus dan promo reaktivasi segera.',
-                    'criteria': f'✓ Ranking #4 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (rendah)\n✓ Recency: {row["Avg_Recency"]:.0f} hari (mulai lama)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+                    'description': f'Pelanggan BERISIKO dengan RFM Score rendah ({row["RFM_Score"]:.2f}/3.0).',
+                    'criteria': f'✓ Ranking #4\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari'
                 }
             
-            else:  # rank == 5
-                # Cluster terburuk - sleeping
+            else:
                 labels[cluster_id] = {
                     'name': 'Sleeping Customers',
                     'icon': '😴',
                     'discount': 10,
                     'priority': 5,
-                    'description': f'Pelanggan TIDUR dengan RFM Score terendah ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka sudah lama tidak aktif - perlu kampanye win-back agresif dengan diskon besar untuk bangunkan mereka.',
-                    'criteria': f'✓ Ranking #5 dari 5 cluster (terburuk)\n✓ RFM Score: {row["RFM_Score"]:.2f} (terendah)\n✓ Recency: {row["Avg_Recency"]:.0f} hari (sangat lama)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+                    'description': f'Pelanggan TIDUR dengan RFM Score terendah ({row["RFM_Score"]:.2f}/3.0).',
+                    'criteria': f'✓ Ranking #5\n✓ RFM Score: {row["RFM_Score"]:.2f}'
                 }
         
         rfm_df['Segment'] = rfm_df['Cluster'].map(lambda x: labels[x]['name'])
@@ -780,10 +774,6 @@ class AntyLaundryKMeans:
         
         return top_10.head(10)
 
-
-# ============================================================
-# FUNGSI VISUALISASI
-# ============================================================
 
 def create_cluster_distribution_chart(rfm_df):
     """Pie chart distribusi cluster"""
@@ -818,10 +808,6 @@ def create_rfm_3d_scatter(rfm_df):
     )
     return fig
 
-
-# ============================================================
-# FUNGSI EXPORT & WHATSAPP
-# ============================================================
 
 def generate_default_whatsapp_message(top_10):
     """Generate pesan WhatsApp default untuk TOP 10 pelanggan"""
@@ -875,10 +861,6 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
     output.seek(0)
     return output
 
-
-# ============================================================
-# MAIN APP
-# ============================================================
 
 def main():
     
@@ -1012,17 +994,14 @@ def main():
                 
                 st.success("✅ Analisis selesai!")
                 st.balloons()
-                st.rerun() 
+                st.rerun()
         
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
             st.exception(e)
             st.stop()
     
-# ============================================================
-# TAMPILKAN HASIL UTAMA DI ATAS (TOP 10 + ACTIONS)
-# ============================================================
-if 'rfm_result' in st.session_state:
+    if 'rfm_result' in st.session_state:
         
         rfm = st.session_state['rfm_result']
         top_10 = st.session_state['top_10']
@@ -1032,9 +1011,6 @@ if 'rfm_result' in st.session_state:
         st.markdown("---")
         st.markdown("---")
         
-        # ============================================================
-        # 1. RINGKASAN CEPAT (4 Metrics)
-        # ============================================================
         st.markdown("## 📊 Ringkasan Hasil Analisis")
         
         col1, col2, col3, col4 = st.columns(4)
@@ -1055,14 +1031,10 @@ if 'rfm_result' in st.session_state:
         
         st.markdown("---")
         
-        # ============================================================
-        # 2. TOP 10 PELANGGAN - HIGHLIGHT BOX
-        # ============================================================
         st.markdown("## 🏆 TOP 10 Pelanggan Dapat Diskon Bulan Depan")
         
         st.success("💡 **Dipilih otomatis** dari segmen VIP Champions & High Value Loyal berdasarkan total belanja tertinggi")
         
-        # Tabel TOP 10 yang lebih menarik
         top_10_display = top_10.copy()
         top_10_display['Rank'] = ['🥇', '🥈', '🥉'] + [f'#{i}' for i in range(4, 11)]
         top_10_display['Monetary_Formatted'] = top_10_display['Monetary'].apply(lambda x: f"Rp {x:,.0f}")
@@ -1085,21 +1057,16 @@ if 'rfm_result' in st.session_state:
         
         st.markdown("---")
         
-        # ============================================================
-        # 3. EDIT PESAN WHATSAPP
-        # ============================================================
         st.markdown("## 💬 Kirim Notifikasi ke Pelanggan")
         
         col_left, col_right = st.columns([2, 1])
         
         with col_left:
-            # Inisialisasi session state untuk pesan
             if 'wa_message' not in st.session_state:
                 st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
             
             st.markdown("**✏️ Edit pesan di bawah, lalu klik 'Update Pesan':**")
             
-            # Text area untuk edit pesan
             edited_message = st.text_area(
                 "Pesan WhatsApp",
                 value=st.session_state['wa_message'],
@@ -1108,7 +1075,6 @@ if 'rfm_result' in st.session_state:
                 key="wa_message_editor"
             )
             
-            # Tombol update
             if st.button("🔄 Update Pesan", use_container_width=True, help="Klik setelah edit untuk menyimpan"):
                 st.session_state['wa_message'] = edited_message
                 st.success("✅ Pesan berhasil diupdate!")
@@ -1130,15 +1096,11 @@ if 'rfm_result' in st.session_state:
         
         st.markdown("---")
         
-        # ============================================================
-        # 4. ACTION BUTTONS (SHARE & DOWNLOAD)
-        # ============================================================
         st.markdown("## 📤 Bagikan & Download Laporan")
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            # Generate link WhatsApp
             wa_link = create_whatsapp_link(st.session_state['wa_message'])
             
             st.link_button(
@@ -1182,10 +1144,6 @@ if 'rfm_result' in st.session_state:
         
         st.markdown("---")
         st.markdown("---")
-        
-        # ============================================================
-        # 5. DETAIL ANALISIS (OPSIONAL - DI BAWAH)
-        # ============================================================
         
         with st.expander("📈 **Lihat Visualisasi & Detail Analisis Lengkap**", expanded=False):
             
@@ -1238,11 +1196,9 @@ if 'rfm_result' in st.session_state:
                         cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
                         use_container_width=True
                     )
-        
-        st.markdown("---")
     
     st.markdown("---")
-st.markdown("""
+    st.markdown("""
 <div style='text-align: center; padding: 2rem 0; color: #666;'>
     <p style='margin: 0.5rem 0; font-size: 1rem;'><strong>© 2025 Anty Laundry</strong></p>
     <p style='margin: 0.5rem 0; font-size: 0.9rem;'>Sistem Segmentasi Pelanggan dengan K-Means Clustering</p>
@@ -1253,24 +1209,3 @@ st.markdown("""
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
