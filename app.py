@@ -1233,7 +1233,7 @@ if 'rfm_result' in st.session_state:
                     with col4:
                         st.metric("Diskon", f"{label_info['discount']}%")
                     
-            st.markdown("**👥 Daftar Pelanggan:**")
+                    st.markdown("**👥 Daftar Pelanggan:**")
                     st.dataframe(
                         cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
                         use_container_width=True
@@ -1253,6 +1253,7 @@ st.markdown("""
 
 if __name__ == "__main__":
     main()
+
 
 
 
