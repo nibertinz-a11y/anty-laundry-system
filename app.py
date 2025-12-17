@@ -1,12 +1,3 @@
-"""
-ANTY LAUNDRY - SISTEM SEGMENTASI PELANGGAN
-Menggunakan K-Means Clustering & RFM Analysis
-VERSI SKRIPSI - Data 1 Bulan Terakhir
-
-Author: Anty Laundry Team
-Version: 2.1 (FIXED: Adi & Filke masuk, TOP 10 di atas, WA editable, penjelasan segmen)
-"""
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -1436,3 +1427,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
