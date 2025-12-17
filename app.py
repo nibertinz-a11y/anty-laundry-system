@@ -661,74 +661,111 @@ class AntyLaundryKMeans:
         
         return rfm_df
     
-    def label_clusters(self, rfm_df):
-        """Label setiap cluster berdasarkan karakteristik RFM"""
-        cluster_summary = rfm_df.groupby('Cluster').agg({
-            'Recency': 'mean',
-            'Frequency': 'mean',
-            'Monetary': 'mean',
-            'Konsumen': 'count'
-        }).reset_index()
+def label_clusters(self, rfm_df):
+    """Label setiap cluster berdasarkan karakteristik RFM dengan RFM Score"""
+    cluster_summary = rfm_df.groupby('Cluster').agg({
+        'Recency': 'mean',
+        'Frequency': 'mean',
+        'Monetary': 'mean',
+        'Konsumen': 'count'
+    }).reset_index()
+    
+    cluster_summary.columns = ['Cluster', 'Avg_Recency', 'Avg_Frequency', 'Avg_Monetary', 'Count']
+    
+    # Hitung RFM Score untuk ranking (semakin tinggi semakin baik)
+    # Recency: semakin kecil semakin baik (jadi dibalik)
+    # Frequency: semakin besar semakin baik
+    # Monetary: semakin besar semakin baik
+    
+    max_recency = rfm_df['Recency'].max()
+    cluster_summary['Recency_Score'] = (max_recency - cluster_summary['Avg_Recency']) / max_recency
+    cluster_summary['Frequency_Score'] = cluster_summary['Avg_Frequency'] / rfm_df['Frequency'].max()
+    cluster_summary['Monetary_Score'] = cluster_summary['Avg_Monetary'] / rfm_df['Monetary'].max()
+    
+    # Total RFM Score (0-3, semakin tinggi semakin baik)
+    cluster_summary['RFM_Score'] = (
+        cluster_summary['Recency_Score'] + 
+        cluster_summary['Frequency_Score'] + 
+        cluster_summary['Monetary_Score']
+    )
+    
+    # Sort by RFM Score untuk ranking
+    cluster_summary = cluster_summary.sort_values('RFM_Score', ascending=False).reset_index(drop=True)
+    
+    st.info("📊 Karakteristik Cluster (diurutkan dari terbaik):")
+    for idx, row in cluster_summary.iterrows():
+        st.write(f"**Cluster {row['Cluster']}**: Score={row['RFM_Score']:.2f}, Recency={row['Avg_Recency']:.0f} hari, Freq={row['Avg_Frequency']:.1f}x, Money=Rp{row['Avg_Monetary']:,.0f}, Count={row['Count']}")
+    
+    # 🔴 PERBAIKAN: Labeling berdasarkan RANKING, bukan kondisi overlapping
+    labels = {}
+    
+    for idx, row in cluster_summary.iterrows():
+        cluster_id = row['Cluster']
+        rank = idx + 1  # Ranking dari terbaik (1) ke terburuk (5)
         
-        cluster_summary.columns = ['Cluster', 'Avg_Recency', 'Avg_Frequency', 'Avg_Monetary', 'Count']
+        if rank == 1:
+            # Cluster terbaik (RFM Score tertinggi)
+            labels[cluster_id] = {
+                'name': 'VIP Champions',
+                'icon': '🏆',
+                'discount': 15,
+                'priority': 1,
+                'description': f'Pelanggan TERBAIK dengan RFM Score tertinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka adalah aset paling berharga - pertahankan dengan pelayanan VIP, reward eksklusif, dan komunikasi personal.',
+                'criteria': f'✓ Ranking #1 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (tertinggi)\n✓ Recency: {row["Avg_Recency"]:.0f} hari (sangat baru)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+            }
         
-        st.info("📊 Karakteristik Cluster:")
-        for idx, row in cluster_summary.iterrows():
-            st.write(f"**Cluster {row['Cluster']}**: Recency={row['Avg_Recency']:.0f} hari, Freq={row['Avg_Frequency']:.1f}x, Money=Rp{row['Avg_Monetary']:,.0f}, Count={row['Count']}")
+        elif rank == 2:
+            # Cluster kedua terbaik
+            labels[cluster_id] = {
+                'name': 'High Value Loyal',
+                'icon': '💎',
+                'discount': 10,
+                'priority': 2,
+                'description': f'Pelanggan SETIA dengan RFM Score tinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka loyal dan berkontribusi besar - tingkatkan engagement untuk naik ke VIP Champions.',
+                'criteria': f'✓ Ranking #2 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+            }
         
-        # 🔴 PERBAIKAN 4: Tambah deskripsi lengkap untuk setiap segmen
-        labels = {}
-        for idx, row in cluster_summary.iterrows():
-            cluster_id = row['Cluster']
-            
-            if row['Avg_Recency'] < 15 and row['Avg_Frequency'] >= 3 and row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.75):
-                labels[cluster_id] = {
-                    'name': 'VIP Champions',
-                    'icon': '🏆',
-                    'discount': 15,
-                    'priority': 1,
-                    'description': 'Pelanggan terbaik dengan transaksi sering, baru-baru ini bertransaksi, dan nilai belanja sangat tinggi. Mereka adalah aset paling berharga yang harus dipertahankan dengan pelayanan VIP dan reward eksklusif.'
-                }
-            elif row['Avg_Recency'] < 20 and row['Avg_Frequency'] >= 2 and row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.5):
-                labels[cluster_id] = {
-                    'name': 'High Value Loyal',
-                    'icon': '💎',
-                    'discount': 10,
-                    'priority': 2,
-                    'description': 'Pelanggan setia dengan nilai transaksi tinggi dan frekuensi baik. Mereka sering kembali dan berkontribusi besar pada revenue. Dengan perhatian lebih, mereka berpotensi naik menjadi VIP Champions.'
-                }
-            elif row['Avg_Frequency'] >= 2 or row['Avg_Monetary'] > rfm_df['Monetary'].quantile(0.3):
-                labels[cluster_id] = {
-                    'name': 'Regular Loyal',
-                    'icon': '💚',
-                    'discount': 5,
-                    'priority': 3,
-                    'description': 'Pelanggan reguler yang konsisten bertransaksi. Mereka adalah basis pelanggan yang stabil dan dapat ditingkatkan loyalitasnya dengan program khusus dan komunikasi rutin.'
-                }
-            elif row['Avg_Recency'] > 25:
-                labels[cluster_id] = {
-                    'name': 'Sleeping Customers',
-                    'icon': '😴',
-                    'discount': 10,
-                    'priority': 5,
-                    'description': 'Pelanggan yang sudah lama tidak bertransaksi. Perlu strategi reaktivasi dengan promo menarik, reminder personal, atau special offer untuk membuat mereka kembali menggunakan layanan.'
-                }
-            else:
-                labels[cluster_id] = {
-                    'name': 'At Risk',
-                    'icon': '⚠️',
-                    'discount': 7,
-                    'priority': 4,
-                    'description': 'Pelanggan yang menunjukkan tanda-tanda akan berhenti. Mereka perlu perhatian khusus dan komunikasi intensif untuk mencegah churn dan meningkatkan engagement kembali.'
-                }
+        elif rank == 3:
+            # Cluster menengah
+            labels[cluster_id] = {
+                'name': 'Regular Loyal',
+                'icon': '💚',
+                'discount': 5,
+                'priority': 3,
+                'description': f'Pelanggan REGULER dengan RFM Score menengah ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka adalah basis pelanggan stabil - tingkatkan dengan promo rutin dan program loyalitas.',
+                'criteria': f'✓ Ranking #3 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (menengah)\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+            }
         
-        rfm_df['Segment'] = rfm_df['Cluster'].map(lambda x: labels[x]['name'])
-        rfm_df['Icon'] = rfm_df['Cluster'].map(lambda x: labels[x]['icon'])
-        rfm_df['Discount'] = rfm_df['Cluster'].map(lambda x: labels[x]['discount'])
-        rfm_df['Priority'] = rfm_df['Cluster'].map(lambda x: labels[x]['priority'])
-        rfm_df['Description'] = rfm_df['Cluster'].map(lambda x: labels[x]['description'])
+        elif rank == 4:
+            # Cluster keempat - at risk
+            labels[cluster_id] = {
+                'name': 'At Risk',
+                'icon': '⚠️',
+                'discount': 7,
+                'priority': 4,
+                'description': f'Pelanggan BERISIKO dengan RFM Score rendah ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka menunjukkan tanda akan berhenti - butuh perhatian khusus dan promo reaktivasi segera.',
+                'criteria': f'✓ Ranking #4 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (rendah)\n✓ Recency: {row["Avg_Recency"]:.0f} hari (mulai lama)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+            }
         
-        return rfm_df, labels
+        else:  # rank == 5
+            # Cluster terburuk - sleeping
+            labels[cluster_id] = {
+                'name': 'Sleeping Customers',
+                'icon': '😴',
+                'discount': 10,
+                'priority': 5,
+                'description': f'Pelanggan TIDUR dengan RFM Score terendah ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu. Mereka sudah lama tidak aktif - perlu kampanye win-back agresif dengan diskon besar untuk bangunkan mereka.',
+                'criteria': f'✓ Ranking #5 dari 5 cluster (terburuk)\n✓ RFM Score: {row["RFM_Score"]:.2f} (terendah)\n✓ Recency: {row["Avg_Recency"]:.0f} hari (sangat lama)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x transaksi\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+            }
+    
+    rfm_df['Segment'] = rfm_df['Cluster'].map(lambda x: labels[x]['name'])
+    rfm_df['Icon'] = rfm_df['Cluster'].map(lambda x: labels[x]['icon'])
+    rfm_df['Discount'] = rfm_df['Cluster'].map(lambda x: labels[x]['discount'])
+    rfm_df['Priority'] = rfm_df['Cluster'].map(lambda x: labels[x]['priority'])
+    rfm_df['Description'] = rfm_df['Cluster'].map(lambda x: labels[x]['description'])
+    rfm_df['Criteria'] = rfm_df['Cluster'].map(lambda x: labels[x]['criteria'])
+    
+    return rfm_df, labels
     
     def get_top_10_customers(self, rfm_df):
         """Pilih TOP 10 pelanggan untuk diskon"""
@@ -1129,10 +1166,36 @@ def main():
             cluster_data = rfm[rfm['Cluster'] == cluster_id]
             label_info = cluster_labels[cluster_id]
             
-            with st.expander(f"{label_info['icon']} **{label_info['name']}** ({len(cluster_data)} pelanggan) - Diskon {label_info['discount']}%"):
-                
-                st.markdown(f"**📝 Deskripsi:**")
-                st.info(label_info['description'])
+ with st.expander(f"{label_info['icon']} **{label_info['name']}** ({len(cluster_data)} pelanggan) - Diskon {label_info['discount']}%"):
+    
+    # Deskripsi lengkap
+    st.markdown(f"**📝 Deskripsi Segmen:**")
+    st.info(label_info['description'])
+    
+    # Kriteria RFM
+    st.markdown(f"**🎯 Kriteria & Karakteristik:**")
+    st.code(label_info['criteria'], language=None)
+```
+
+---
+
+## **Penjelasan Perbaikan:**
+
+### **Sebelum (SALAH):**
+```
+IF recency < 15 AND freq >= 3 AND money > Q75 → VIP Champions
+ELIF recency < 20 AND freq >= 2 AND money > Q50 → High Value
+```
+☠️ **Masalah:** Beberapa cluster bisa masuk kriteria yang sama!
+
+### **Sesudah (BENAR):**
+```
+1. Hitung RFM Score untuk semua cluster
+2. Sort dari score tertinggi ke terendah
+3. Rank #1 = VIP Champions (hanya 1!)
+4. Rank #2 = High Value Loyal
+5. Rank #3 = Regular Loyal
+...dst
                 
                 st.markdown("---")
                 
@@ -1179,6 +1242,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
