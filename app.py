@@ -1157,7 +1157,7 @@ def main():
         
         st.markdown("---")
         
-  st.markdown("## 🎯 Detail Segmentasi")
+        st.markdown("## 🎯 Detail Segmentasi")
         
         st.info("📌 **Penjelasan Segmen:** Setiap segmen memiliki karakteristik RFM yang berbeda. Klik untuk melihat detail pelanggan di setiap segmen beserta strategi yang disarankan.")
         
@@ -1216,6 +1216,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
