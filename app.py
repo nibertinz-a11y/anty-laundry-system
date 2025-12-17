@@ -1234,14 +1234,14 @@ if 'rfm_result' in st.session_state:
                         st.metric("Diskon", f"{label_info['discount']}%")
                     
             st.markdown("**👥 Daftar Pelanggan:**")
-            st.dataframe(
-                cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
-                use_container_width=True
-            )
+                    st.dataframe(
+                        cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
+                        use_container_width=True
+                    )
+        
+        st.markdown("---")
     
     st.markdown("---")
-
-st.markdown("---")
 st.markdown("""
 <div style='text-align: center; padding: 2rem 0; color: #666;'>
     <p style='margin: 0.5rem 0; font-size: 1rem;'><strong>© 2025 Anty Laundry</strong></p>
@@ -1253,6 +1253,7 @@ st.markdown("""
 
 if __name__ == "__main__":
     main()
+
 
 
 
