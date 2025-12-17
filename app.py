@@ -1157,8 +1157,7 @@ def main():
         
         st.markdown("---")
         
-        # 🔴 PERBAIKAN 4: Detail Segmen dengan Penjelasan Lengkap
-        st.markdown("## 🎯 Detail Segmentasi")
+  st.markdown("## 🎯 Detail Segmentasi")
         
         st.info("📌 **Penjelasan Segmen:** Setiap segmen memiliki karakteristik RFM yang berbeda. Klik untuk melihat detail pelanggan di setiap segmen beserta strategi yang disarankan.")
         
@@ -1166,36 +1165,13 @@ def main():
             cluster_data = rfm[rfm['Cluster'] == cluster_id]
             label_info = cluster_labels[cluster_id]
             
- with st.expander(f"{label_info['icon']} **{label_info['name']}** ({len(cluster_data)} pelanggan) - Diskon {label_info['discount']}%"):
-    
-    # Deskripsi lengkap
-    st.markdown(f"**📝 Deskripsi Segmen:**")
-    st.info(label_info['description'])
-    
-    # Kriteria RFM
-    st.markdown(f"**🎯 Kriteria & Karakteristik:**")
-    st.code(label_info['criteria'], language=None)
-```
-
----
-
-## **Penjelasan Perbaikan:**
-
-### **Sebelum (SALAH):**
-```
-IF recency < 15 AND freq >= 3 AND money > Q75 → VIP Champions
-ELIF recency < 20 AND freq >= 2 AND money > Q50 → High Value
-```
-☠️ **Masalah:** Beberapa cluster bisa masuk kriteria yang sama!
-
-### **Sesudah (BENAR):**
-```
-1. Hitung RFM Score untuk semua cluster
-2. Sort dari score tertinggi ke terendah
-3. Rank #1 = VIP Champions (hanya 1!)
-4. Rank #2 = High Value Loyal
-5. Rank #3 = Regular Loyal
-...dst
+            with st.expander(f"{label_info['icon']} **{label_info['name']}** ({len(cluster_data)} pelanggan) - Diskon {label_info['discount']}%"):
+                
+                st.markdown("**📝 Deskripsi Segmen:**")
+                st.info(label_info['description'])
+                
+                st.markdown("**🎯 Kriteria & Karakteristik:**")
+                st.code(label_info['criteria'], language=None)
                 
                 st.markdown("---")
                 
@@ -1221,8 +1197,6 @@ ELIF recency < 20 AND freq >= 2 AND money > Q50 → High Value
         
         st.markdown("---")
         
-        st.markdown("## 📋 Langkah Selanjutnya")
-        
         st.success("""
         ✅ **Simpan laporan** dan berikan ke karyawan  
         ✅ **Input diskon** untuk 10 pelanggan di kasir laundry1010dry  
@@ -1242,6 +1216,7 @@ ELIF recency < 20 AND freq >= 2 AND money > Q50 → High Value
 
 if __name__ == "__main__":
     main()
+
 
 
 
