@@ -1240,9 +1240,6 @@ if 'rfm_result' in st.session_state:
                     )
         
         st.markdown("---")
-```
-
----
 
     st.markdown("---")
     st.markdown("""
@@ -1256,6 +1253,7 @@ if 'rfm_result' in st.session_state:
 
 if __name__ == "__main__":
     main()
+
 
 
 
