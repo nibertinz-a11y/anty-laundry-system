@@ -1242,7 +1242,7 @@ if 'rfm_result' in st.session_state:
         st.markdown("---")
 
     st.markdown("---")
-    st.markdown("""
+st.markdown("""
     <div style='text-align: center; padding: 2rem 0; color: #666;'>
         <p style='margin: 0.5rem 0; font-size: 1rem;'><strong>© 2025 Anty Laundry</strong></p>
         <p style='margin: 0.5rem 0; font-size: 0.9rem;'>Sistem Segmentasi Pelanggan dengan K-Means Clustering</p>
@@ -1253,6 +1253,7 @@ if 'rfm_result' in st.session_state:
 
 if __name__ == "__main__":
     main()
+
 
 
 
