@@ -1235,33 +1235,13 @@ def main():
         df_clean = st.session_state['df_clean']
         
         st.markdown("---")
-        st.markdown("---")
         
-        st.markdown("## 📊 Ringkasan Hasil Analisis")
+        # ============================================================
+        # 🔥 PRIORITAS #1: TOP 10 PELANGGAN DI ATAS (HERO SECTION)
+        # ============================================================
+        st.markdown("## 🏆 TOP 10 Pelanggan Loyal - Dapat Diskon!")
         
-        # RESPONSIVE: 2 kolom di mobile, 4 kolom di desktop
-        col1, col2 = st.columns(2)
-        col3, col4 = st.columns(2)
-        
-        with col1:
-            st.metric("Total Pelanggan", len(rfm))
-        
-        with col2:
-            st.metric("Total Transaksi", len(df_clean))
-        
-        with col3:
-            period = f"{df_clean['Tanggal'].min().strftime('%d/%m')} - {df_clean['Tanggal'].max().strftime('%d/%m/%Y')}"
-            st.metric("Periode Data", period)
-        
-        with col4:
-            vip_count = len(rfm[rfm['Segment'] == 'VIP Champions'])
-            st.metric("VIP Champions", vip_count, delta="🏆")
-        
-        st.markdown("---")
-        
-        st.markdown("## 🏆 TOP 10 Pelanggan Dapat Diskon Bulan Depan")
-        
-        st.success("💡 **Dipilih otomatis** dari segmen VIP Champions & High Value Loyal berdasarkan total belanja tertinggi")
+        st.success("✨ **Pelanggan terbaik bulan ini!** Bagikan sekarang 👇")
         
         top_10_display = top_10.copy()
         top_10_display['Rank'] = ['🥇', '🥈', '🥉'] + [f'#{i}' for i in range(4, 11)]
@@ -1280,59 +1260,27 @@ def main():
             }),
             use_container_width=True,
             hide_index=True,
-            height=400
+            height=420
         )
         
         st.markdown("---")
         
-        st.markdown("## 💬 Kirim Notifikasi ke Pelanggan")
+        # ============================================================
+        # 🔥 PRIORITAS #2: TOMBOL SHARE & DOWNLOAD (LANGSUNG DI BAWAH TABLE)
+        # ============================================================
+        st.markdown("### 📤 Bagikan Sekarang")
         
-        # RESPONSIVE: Stack columns di mobile
-        col_left, col_right = st.columns([3, 1])
+        # Inisialisasi pesan WhatsApp default
+        if 'wa_message' not in st.session_state:
+            st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
         
-        with col_left:
-            if 'wa_message' not in st.session_state:
-                st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
-            
-            st.markdown("**✏️ Edit pesan:**")
-            
-            edited_message = st.text_area(
-                "Pesan WhatsApp",
-                value=st.session_state['wa_message'],
-                height=300,
-                help="Edit pesan sesuai kebutuhan",
-                key="wa_message_editor"
-            )
-            
-            if st.button("🔄 Update Pesan", use_container_width=True):
-                st.session_state['wa_message'] = edited_message
-                st.success("✅ Pesan berhasil diupdate!")
-                st.rerun()
-        
-        with col_right:
-            st.markdown("**📱 Info:**")
-            st.info(f"{len(st.session_state['wa_message'])} karakter")
-            
-            st.metric("Penerima", "10")
-            
-            total_discount_value = sum([
-                row['Monetary'] * row['Discount'] / 100 
-                for _, row in top_10.iterrows()
-            ])
-            st.metric("Nilai Diskon", f"Rp {total_discount_value:,.0f}")
-        
-        st.markdown("---")
-        
-        st.markdown("## 📤 Bagikan & Download Laporan")
-        
-        # RESPONSIVE: Stack buttons di mobile (1 kolom), 3 kolom di desktop
+        # TOMBOL BESAR - 3 kolom
         col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
             wa_link = create_whatsapp_link(st.session_state['wa_message'])
-            
             st.link_button(
-                "💬 WhatsApp",
+                "💬 Kirim WA",
                 wa_link,
                 use_container_width=True,
                 type="primary"
@@ -1370,10 +1318,61 @@ def main():
                 use_container_width=True
             )
         
+        # Info ringkas
+        st.info(f"📱 {len(st.session_state['wa_message'])} karakter • 👥 10 penerima • 💰 Estimasi diskon: Rp {sum([row['Monetary'] * row['Discount'] / 100 for _, row in top_10.iterrows()]):,.0f}")
+        
+        # ============================================================
+        # EDIT PESAN WHATSAPP (Collapsible - Optional)
+        # ============================================================
+        with st.expander("✏️ **Edit Pesan WhatsApp** (opsional)", expanded=False):
+            
+            edited_message = st.text_area(
+                "Pesan WhatsApp",
+                value=st.session_state['wa_message'],
+                height=300,
+                help="Edit pesan sesuai kebutuhan",
+                key="wa_message_editor",
+                label_visibility="collapsed"
+            )
+            
+            if st.button("🔄 Update Pesan", use_container_width=True):
+                st.session_state['wa_message'] = edited_message
+                st.success("✅ Pesan berhasil diupdate!")
+                st.rerun()
+        
         st.markdown("---")
         st.markdown("---")
         
-        with st.expander("📈 **Lihat Visualisasi & Detail Analisis Lengkap**", expanded=False):
+        # ============================================================
+        # BAGIAN DETAIL (DI BAWAH - OPTIONAL)
+        # ============================================================
+        # ============================================================
+        # BAGIAN DETAIL (DI BAWAH - OPTIONAL)
+        # ============================================================
+        
+        with st.expander("📊 **Lihat Ringkasan & Statistik Lengkap**", expanded=False):
+            
+            st.markdown("### 📈 Ringkasan Analisis")
+            
+            # RESPONSIVE: 2 kolom di mobile, 4 kolom di desktop
+            col1, col2 = st.columns(2)
+            col3, col4 = st.columns(2)
+            
+            with col1:
+                st.metric("Total Pelanggan", len(rfm))
+            
+            with col2:
+                st.metric("Total Transaksi", len(df_clean))
+            
+            with col3:
+                period = f"{df_clean['Tanggal'].min().strftime('%d/%m')} - {df_clean['Tanggal'].max().strftime('%d/%m/%Y')}"
+                st.metric("Periode Data", period)
+            
+            with col4:
+                vip_count = len(rfm[rfm['Segment'] == 'VIP Champions'])
+                st.metric("VIP Champions", vip_count, delta="🏆")
+            
+            st.markdown("---")
             
             st.markdown("### 📊 Distribusi Segmen")
             
