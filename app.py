@@ -47,27 +47,42 @@ st.markdown("""
         background-attachment: fixed;
     }
     
-    /* Main container - dark theme */
+    /* Main container - RESPONSIVE */
     .main .block-container {
         background: rgba(26, 26, 46, 0.7);
         backdrop-filter: blur(30px);
         border-radius: 0px;
-        padding: 3rem 4rem;
+        padding: 1.5rem 1rem;
         box-shadow: none;
         border: none;
         max-width: 100%;
     }
     
-    /* Hero Header - Modern Dark */
+    /* Desktop: padding lebih besar */
+    @media (min-width: 768px) {
+        .main .block-container {
+            padding: 3rem 4rem;
+        }
+    }
+    
+    /* Hero Header - RESPONSIVE */
     .main-header {
         background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-        padding: 3rem 3rem;
-        border-radius: 24px;
+        padding: 1.5rem 1.5rem;
+        border-radius: 16px;
         color: white;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
         box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
         position: relative;
         overflow: hidden;
+    }
+    
+    @media (min-width: 768px) {
+        .main-header {
+            padding: 3rem 3rem;
+            border-radius: 24px;
+            margin-bottom: 3rem;
+        }
     }
     
     .main-header::before {
@@ -83,21 +98,41 @@ st.markdown("""
     .logo-container {
         display: flex;
         align-items: center;
-        gap: 2.5rem;
+        gap: 1rem;
         position: relative;
         z-index: 1;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+    
+    @media (min-width: 768px) {
+        .logo-container {
+            gap: 2.5rem;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            text-align: left;
+        }
     }
     
     .logo-img {
-        height: 90px;
-        width: 90px;
-        border-radius: 20px;
+        height: 60px;
+        width: 60px;
+        border-radius: 16px;
         background: white;
-        padding: 12px;
+        padding: 8px;
         box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         object-fit: contain;
         flex-shrink: 0;
+    }
+    
+    @media (min-width: 768px) {
+        .logo-img {
+            height: 90px;
+            width: 90px;
+            border-radius: 20px;
+            padding: 12px;
+        }
     }
     
     .header-text {
@@ -107,35 +142,62 @@ st.markdown("""
     
     .header-text h1 {
         margin: 0 0 0.3rem 0;
-        font-size: 2.8rem;
+        font-size: 1.8rem;
         font-weight: 900;
-        letter-spacing: -1.5px;
-        line-height: 1.1;
+        letter-spacing: -1px;
+        line-height: 1.2;
+    }
+    
+    @media (min-width: 768px) {
+        .header-text h1 {
+            font-size: 2.8rem;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+        }
     }
     
     .header-text h3 {
         margin: 0 0 0.5rem 0;
-        font-size: 1.2rem;
+        font-size: 0.95rem;
         font-weight: 500;
         opacity: 0.95;
-        letter-spacing: 0.3px;
+        letter-spacing: 0.2px;
+    }
+    
+    @media (min-width: 768px) {
+        .header-text h3 {
+            font-size: 1.2rem;
+            letter-spacing: 0.3px;
+        }
     }
     
     .header-text p {
         margin: 0;
-        font-size: 0.95rem;
+        font-size: 0.85rem;
         opacity: 0.85;
         font-weight: 400;
     }
     
-    /* Sidebar - Dark Purple */
+    @media (min-width: 768px) {
+        .header-text p {
+            font-size: 0.95rem;
+        }
+    }
+    
+    /* Sidebar - RESPONSIVE */
     section[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
         border-right: 1px solid rgba(139, 92, 246, 0.2);
     }
     
     section[data-testid="stSidebar"] .block-container {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem 1rem;
+    }
+    
+    @media (min-width: 768px) {
+        section[data-testid="stSidebar"] .block-container {
+            padding: 2rem 1.5rem;
+        }
     }
     
     section[data-testid="stSidebar"] * {
@@ -177,20 +239,29 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
     
-    /* Large Primary Button */
+    /* Large Primary Button - RESPONSIVE */
     .stButton>button {
         background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
         color: white;
         font-weight: 700;
-        font-size: 1.2rem;
+        font-size: 1rem;
         border: none;
-        border-radius: 16px;
-        padding: 1.2rem 2.5rem;
+        border-radius: 14px;
+        padding: 1rem 1.5rem;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
         text-transform: none;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.3px;
         width: 100%;
+    }
+    
+    @media (min-width: 768px) {
+        .stButton>button {
+            font-size: 1.2rem;
+            border-radius: 16px;
+            padding: 1.2rem 2.5rem;
+            letter-spacing: 0.5px;
+        }
     }
     
     .stButton>button:hover {
@@ -199,15 +270,22 @@ st.markdown("""
         background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
     }
     
-    /* Metrics Cards - Glass Effect */
+    /* Metrics Cards - RESPONSIVE */
     div[data-testid="stMetric"] {
         background: rgba(99, 102, 241, 0.08);
         backdrop-filter: blur(20px);
-        padding: 2rem 1.5rem;
-        border-radius: 20px;
+        padding: 1.2rem 1rem;
+        border-radius: 16px;
         border: 1px solid rgba(99, 102, 241, 0.2);
         box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
+    }
+    
+    @media (min-width: 768px) {
+        div[data-testid="stMetric"] {
+            padding: 2rem 1.5rem;
+            border-radius: 20px;
+        }
     }
     
     div[data-testid="stMetric"]:hover {
@@ -218,18 +296,31 @@ st.markdown("""
     }
     
     div[data-testid="stMetricValue"] {
-        font-size: 2.8rem;
+        font-size: 1.8rem;
         font-weight: 900;
         color: #a78bfa;
         letter-spacing: -1px;
     }
     
+    @media (min-width: 768px) {
+        div[data-testid="stMetricValue"] {
+            font-size: 2.8rem;
+        }
+    }
+    
     div[data-testid="stMetricLabel"] {
-        font-size: 0.9rem;
+        font-size: 0.75rem;
         font-weight: 600;
         color: #9ca3af;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
+        letter-spacing: 1px;
+    }
+    
+    @media (min-width: 768px) {
+        div[data-testid="stMetricLabel"] {
+            font-size: 0.9rem;
+            letter-spacing: 1.5px;
+        }
     }
     
     /* Alert boxes - Modern */
@@ -283,20 +374,36 @@ st.markdown("""
         color: #ddd6fe;
     }
     
-    /* DataFrames - Dark */
+    /* DataFrames - RESPONSIVE */
     .dataframe {
-        border-radius: 16px;
+        border-radius: 12px;
         overflow: hidden;
         border: 1px solid rgba(99, 102, 241, 0.2);
         background: rgba(30, 27, 75, 0.5);
+        font-size: 0.8rem;
+    }
+    
+    @media (min-width: 768px) {
+        .dataframe {
+            border-radius: 16px;
+            font-size: 0.95rem;
+        }
     }
     
     .dataframe thead tr th {
         background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
         color: white;
         font-weight: 700;
-        padding: 1rem;
+        padding: 0.7rem 0.5rem;
         border: none;
+        font-size: 0.75rem;
+    }
+    
+    @media (min-width: 768px) {
+        .dataframe thead tr th {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
     }
     
     .dataframe tbody tr {
@@ -309,8 +416,16 @@ st.markdown("""
     }
     
     .dataframe tbody tr td {
-        padding: 0.9rem 1rem;
+        padding: 0.6rem 0.5rem;
         border: none;
+        font-size: 0.75rem;
+    }
+    
+    @media (min-width: 768px) {
+        .dataframe tbody tr td {
+            padding: 0.9rem 1rem;
+            font-size: 0.9rem;
+        }
     }
     
     /* File Uploader - Hero Style */
@@ -336,16 +451,25 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* Download Buttons - Success Color */
+    /* Download & WhatsApp Buttons - RESPONSIVE */
     .stDownloadButton>button {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
         font-weight: 600;
         border: none;
-        border-radius: 14px;
-        padding: 1rem 1.8rem;
+        border-radius: 12px;
+        padding: 0.8rem 1.2rem;
         transition: all 0.3s ease;
         box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        font-size: 0.9rem;
+    }
+    
+    @media (min-width: 768px) {
+        .stDownloadButton>button {
+            border-radius: 14px;
+            padding: 1rem 1.8rem;
+            font-size: 1rem;
+        }
     }
     
     .stDownloadButton>button:hover {
@@ -359,12 +483,21 @@ st.markdown("""
         color: white !important;
         font-weight: 600;
         border: none;
-        border-radius: 14px;
-        padding: 1rem 1.8rem;
+        border-radius: 12px;
+        padding: 0.8rem 1.2rem;
         text-decoration: none;
         display: inline-block;
         transition: all 0.3s ease;
         box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+        font-size: 0.9rem;
+    }
+    
+    @media (min-width: 768px) {
+        .stLinkButton>a {
+            border-radius: 14px;
+            padding: 1rem 1.8rem;
+            font-size: 1rem;
+        }
     }
     
     .stLinkButton>a:hover {
@@ -389,47 +522,96 @@ st.markdown("""
         background: rgba(30, 27, 75, 0.3);
     }
     
-    /* Headings - Light on Dark */
+    /* Headings - RESPONSIVE */
     h1, h2, h3, h4, h5, h6 {
         color: #f3f4f6;
     }
     
     h2 {
         font-weight: 800;
-        font-size: 2.2rem;
-        margin-top: 2.5rem;
-        margin-bottom: 1.5rem;
+        font-size: 1.6rem;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
         background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        letter-spacing: -1px;
+        letter-spacing: -0.5px;
+    }
+    
+    @media (min-width: 768px) {
+        h2 {
+            font-size: 2.2rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
     }
     
     h3 {
         color: #c4b5fd;
         font-weight: 700;
-        font-size: 1.4rem;
+        font-size: 1.1rem;
+    }
+    
+    @media (min-width: 768px) {
+        h3 {
+            font-size: 1.4rem;
+        }
     }
     
     /* Paragraphs */
     p {
         color: #d1d5db;
         line-height: 1.7;
+        font-size: 0.9rem;
     }
     
-    /* Text area - Dark */
+    @media (min-width: 768px) {
+        p {
+            font-size: 1rem;
+        }
+    }
+    
+    /* Text area - RESPONSIVE */
     textarea {
         background: rgba(30, 27, 75, 0.5) !important;
         border: 1px solid rgba(99, 102, 241, 0.3) !important;
-        border-radius: 14px !important;
+        border-radius: 12px !important;
         color: #e5e7eb !important;
         font-family: 'Inter', monospace;
+        font-size: 0.85rem !important;
+    }
+    
+    @media (min-width: 768px) {
+        textarea {
+            border-radius: 14px !important;
+            font-size: 0.95rem !important;
+        }
     }
     
     textarea:focus {
         border-color: rgba(99, 102, 241, 0.6) !important;
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+    }
+    
+    /* Touch-friendly improvements for mobile */
+    @media (max-width: 767px) {
+        /* Larger tap targets */
+        button, a, input, select, textarea {
+            min-height: 44px;
+        }
+        
+        /* Prevent text size adjustment on orientation change */
+        * {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+        
+        /* Better scrolling on iOS */
+        .main {
+            -webkit-overflow-scrolling: touch;
+        }
     }
     
     /* Spinner */
@@ -1013,7 +1195,9 @@ def main():
         
         st.markdown("## 📊 Ringkasan Hasil Analisis")
         
-        col1, col2, col3, col4 = st.columns(4)
+        # RESPONSIVE: 2 kolom di mobile, 4 kolom di desktop
+        col1, col2 = st.columns(2)
+        col3, col4 = st.columns(2)
         
         with col1:
             st.metric("Total Pelanggan", len(rfm))
@@ -1059,52 +1243,52 @@ def main():
         
         st.markdown("## 💬 Kirim Notifikasi ke Pelanggan")
         
-        col_left, col_right = st.columns([2, 1])
+        # RESPONSIVE: Stack columns di mobile
+        col_left, col_right = st.columns([3, 1])
         
         with col_left:
             if 'wa_message' not in st.session_state:
                 st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
             
-            st.markdown("**✏️ Edit pesan di bawah, lalu klik 'Update Pesan':**")
+            st.markdown("**✏️ Edit pesan:**")
             
             edited_message = st.text_area(
                 "Pesan WhatsApp",
                 value=st.session_state['wa_message'],
-                height=350,
-                help="Edit pesan sesuai kebutuhan, lalu klik Update Pesan",
+                height=300,
+                help="Edit pesan sesuai kebutuhan",
                 key="wa_message_editor"
             )
             
-            if st.button("🔄 Update Pesan", use_container_width=True, help="Klik setelah edit untuk menyimpan"):
+            if st.button("🔄 Update Pesan", use_container_width=True):
                 st.session_state['wa_message'] = edited_message
                 st.success("✅ Pesan berhasil diupdate!")
                 st.rerun()
         
         with col_right:
-            st.markdown("**📱 Preview:**")
-            st.info(f"Pesan akan dikirim dengan {len(st.session_state['wa_message'])} karakter")
+            st.markdown("**📱 Info:**")
+            st.info(f"{len(st.session_state['wa_message'])} karakter")
             
-            st.markdown("**👥 Target:**")
-            st.metric("Jumlah Penerima", "10 pelanggan")
+            st.metric("Penerima", "10")
             
-            st.markdown("**💰 Total Diskon:**")
             total_discount_value = sum([
                 row['Monetary'] * row['Discount'] / 100 
                 for _, row in top_10.iterrows()
             ])
-            st.metric("Estimasi Nilai", f"Rp {total_discount_value:,.0f}")
+            st.metric("Nilai Diskon", f"Rp {total_discount_value:,.0f}")
         
         st.markdown("---")
         
         st.markdown("## 📤 Bagikan & Download Laporan")
         
-        col1, col2, col3 = st.columns(3)
+        # RESPONSIVE: Stack buttons di mobile (1 kolom), 3 kolom di desktop
+        col1, col2, col3 = st.columns([1, 1, 1])
         
         with col1:
             wa_link = create_whatsapp_link(st.session_state['wa_message'])
             
             st.link_button(
-                "💬 Kirim ke WhatsApp",
+                "💬 WhatsApp",
                 wa_link,
                 use_container_width=True,
                 type="primary"
@@ -1124,9 +1308,9 @@ def main():
             excel_data = export_to_excel(rfm, top_10, cluster_summary)
             
             st.download_button(
-                label="📊 Download Laporan Excel",
+                label="📊 Excel",
                 data=excel_data,
-                file_name=f"Laporan_Segmentasi_KMeans_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                file_name=f"Laporan_KMeans_{datetime.now().strftime('%Y%m%d')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True
             )
@@ -1135,9 +1319,9 @@ def main():
             csv = top_10[['Konsumen', 'Segment', 'Recency', 'Frequency', 'Monetary', 'Discount']].to_csv(index=False)
             
             st.download_button(
-                label="📄 Download TOP 10 (CSV)",
+                label="📄 CSV",
                 data=csv,
-                file_name=f"TOP_10_KMeans_{datetime.now().strftime('%Y%m%d')}.csv",
+                file_name=f"TOP_10_{datetime.now().strftime('%Y%m%d')}.csv",
                 mime="text/csv",
                 use_container_width=True
             )
