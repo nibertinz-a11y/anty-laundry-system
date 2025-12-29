@@ -1143,7 +1143,7 @@ def main():
         st.markdown("### 🎯 Segmen Pelanggan")
         st.markdown("""
         🏆 **VIP Champions** → 15%  
-        💎 **High Value Loyal** → 11%  
+        💎 **High Value Loyal** → 15%  
         💚 **Regular Loyal** → 15%  
         ⚠️ **At Risk** → 15%  
         😴 **Sleeping** → 15%
@@ -1427,5 +1427,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
