@@ -54,27 +54,47 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-        /* PASTIKAN SIDEBAR TOGGLE BUTTON SELALU TERLIHAT */
-    button[data-testid="collapsedControl"] {
+ /* PASTIKAN SIDEBAR TOGGLE BUTTON SELALU TERLIHAT - FIXED */
+    button[kind="header"] {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         z-index: 999999 !important;
         position: fixed !important;
-        top: 0.5rem !important;
-        left: 0.5rem !important;
+        top: 1rem !important;
+        left: 1rem !important;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        border-radius: 12px !important;
+        padding: 0.8rem !important;
+        width: 48px !important;
+        height: 48px !important;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5) !important;
+        transition: all 0.3s ease !important;
+        border: 2px solid rgba(255, 255, 255, 0.2) !important;
     }
     
-    /* Style custom untuk toggle button */
-    button[data-testid="collapsedControl"] svg {
-        fill: #8b5cf6 !important;
-        width: 24px !important;
-        height: 24px !important;
+    button[kind="header"]:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.7) !important;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
     }
     
-    button[data-testid="collapsedControl"]:hover {
-        background-color: rgba(139, 92, 246, 0.1) !important;
-        border-radius: 8px !important;
+    button[kind="header"] svg {
+        color: white !important;
+        fill: white !important;
+        width: 20px !important;
+        height: 20px !important;
+    }
+    
+    /* Pastikan tombol tetap ada saat sidebar collapse */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        top: 1rem !important;
+        left: 1rem !important;
+        z-index: 999999 !important;
     }
     
     /* Dark background gradient */
@@ -1126,61 +1146,27 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
 
 def main():
     
-    # Inject JavaScript untuk handle sidebar toggle
     st.markdown("""
-    <style>
-    /* Tombol Custom untuk Buka Sidebar */
-    .custom-sidebar-toggle {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 999999;
-        width: 48px;
-        height: 48px;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
-        transition: all 0.3s ease;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .custom-sidebar-toggle:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.7);
-        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-    }
-    
-    .custom-sidebar-toggle svg {
-        width: 24px;
-        height: 24px;
-        fill: white;
-    }
-    </style>
-    
-    <div class="custom-sidebar-toggle" id="customSidebarToggle">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
+    <div class="main-header">
+        <div class="logo-container">
+            <img src='https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDZqeHY5cWl3bTF1d2p4dDF6NGw1dHUwcG1yb3M2aTl6Nmd3dXZwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/jowM6pSgsD9TwLqwje/giphy.gif' 
+                 class='logo-img'
+                 alt='Anty Laundry Logo'>
+            <div class="header-text">
+                <h1>🧺 ANTY LAUNDRY</h1>
+                <h3>Sistem Segmentasi Pelanggan - K-Means Clustering</h3>
+            </div>
+        </div>
     </div>
+    """, unsafe_allow_html=True)
     
-    <script>
-    // Function untuk toggle sidebar
-    function toggleSidebar() {
-        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-        const toggleButton = window.parent.document.querySelector('button[kind="header"]');
-        const customToggle = window.parent.document.getElementById('customSidebarToggle');
-        
-        // Coba klik tombol bawaan Streamlit dulu
-        if (toggleButton) {
-            toggleButton.click();
-            return;
-        }
+    with st.sidebar:
+        st.markdown("""
+        <div class="sidebar-logo">
+            <img src='https://i.imgur.com/BP3MK3t.jpeg' 
+                 alt='Anty Laundry Logo'>
+        </div>
+        """, unsafe_allow_html=True)
         
         // Kalau tidak ada, manipulasi langsung
         if (sidebar) {
