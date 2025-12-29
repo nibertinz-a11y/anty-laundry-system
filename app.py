@@ -1126,34 +1126,27 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
 
 def main():
     
-    # TOMBOL BUKA SIDEBAR (JIKA TERTUTUP) - DI MAIN CONTENT
+    # CSS untuk styling tombol toggle yang sudah ada
     st.markdown("""
     <style>
-    .open-sidebar-btn {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 999999;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 0.8rem 1rem;
-        font-size: 1.2rem;
-        cursor: pointer;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-        transition: all 0.3s ease;
+    /* Style untuk tombol toggle bawaan Streamlit */
+    button[kind="header"] {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        border-radius: 12px !important;
+        padding: 0.8rem !important;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
     }
-    .open-sidebar-btn:hover {
+    
+    button[kind="header"]:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5);
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5) !important;
+    }
+    
+    button[kind="header"] svg {
+        color: white !important;
+        fill: white !important;
     }
     </style>
-    
-    <button class="open-sidebar-btn" onclick="
-        const btn = window.parent.document.querySelector('[data-testid=\\'collapsedControl\\']');
-        if (btn) btn.click();
-    ">☰</button>
     """, unsafe_allow_html=True)
     
     st.markdown("""
@@ -1171,23 +1164,13 @@ def main():
     """, unsafe_allow_html=True)
     
     with st.sidebar:
-        # TOMBOL TUTUP SIDEBAR (MANUAL) - ALWAYS VISIBLE
-        col_logo, col_close = st.columns([4, 1])
-        with col_close:
-            if st.button("✖", help="Tutup Sidebar", key="close_sidebar"):
-                st.markdown("""
-                <script>
-                const btn = window.parent.document.querySelector('[data-testid="collapsedControl"]');
-                if (btn) btn.click();
-                </script>
-                """, unsafe_allow_html=True)
-        
         st.markdown("""
         <div class="sidebar-logo">
             <img src='https://i.imgur.com/BP3MK3t.jpeg' 
                  alt='Anty Laundry Logo'>
         </div>
         """, unsafe_allow_html=True)
+        
         
         st.markdown("### ⚙️ Pengaturan Analisis")
         months_back = st.selectbox(
