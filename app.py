@@ -19,6 +19,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# INJECT CUSTOM CSS & JS UNTUK SIDEBAR TOGGLE PERMANEN
+st.markdown("""
+<script>
+// Pastikan toggle button selalu ada
+window.addEventListener('load', function() {
+    const observer = new MutationObserver(function() {
+        const collapseBtn = parent.document.querySelector('[data-testid="collapsedControl"]');
+        if (collapseBtn) {
+            collapseBtn.style.display = 'flex !important';
+            collapseBtn.style.visibility = 'visible !important';
+            collapseBtn.style.opacity = '1 !important';
+        }
+    });
+    
+    observer.observe(parent.document.body, {
+        childList: true,
+        subtree: true
+    });
+});
+</script>
+""", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -31,6 +53,29 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
+
+        /* PASTIKAN SIDEBAR TOGGLE BUTTON SELALU TERLIHAT */
+    button[data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 999999 !important;
+        position: fixed !important;
+        top: 0.5rem !important;
+        left: 0.5rem !important;
+    }
+    
+    /* Style custom untuk toggle button */
+    button[data-testid="collapsedControl"] svg {
+        fill: #8b5cf6 !important;
+        width: 24px !important;
+        height: 24px !important;
+    }
+    
+    button[data-testid="collapsedControl"]:hover {
+        background-color: rgba(139, 92, 246, 0.1) !important;
+        border-radius: 8px !important;
+    }
     
     /* Dark background gradient */
     .stApp {
@@ -1081,6 +1126,29 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
 
 def main():
     
+    # CSS untuk styling tombol toggle yang sudah ada
+    st.markdown("""
+    <style>
+    /* Style untuk tombol toggle bawaan Streamlit */
+    button[kind="header"] {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        border-radius: 12px !important;
+        padding: 0.8rem !important;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
+    }
+    
+    button[kind="header"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5) !important;
+    }
+    
+    button[kind="header"] svg {
+        color: white !important;
+        fill: white !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     st.markdown("""
     <div class="main-header">
         <div class="logo-container">
@@ -1102,6 +1170,7 @@ def main():
                  alt='Anty Laundry Logo'>
         </div>
         """, unsafe_allow_html=True)
+        
         
         st.markdown("### ⚙️ Pengaturan Analisis")
         months_back = st.selectbox(
