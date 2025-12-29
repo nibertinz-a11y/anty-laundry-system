@@ -1170,7 +1170,7 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-      with st.sidebar:
+    with st.sidebar:
         # TOMBOL TUTUP SIDEBAR (MANUAL) - ALWAYS VISIBLE
         col_logo, col_close = st.columns([4, 1])
         with col_close:
@@ -1513,7 +1513,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
 
