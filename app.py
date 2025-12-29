@@ -1126,27 +1126,96 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
 
 def main():
     
-    # CSS untuk styling tombol toggle yang sudah ada
+    # Inject JavaScript untuk handle sidebar toggle
     st.markdown("""
     <style>
-    /* Style untuk tombol toggle bawaan Streamlit */
-    button[kind="header"] {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-        border-radius: 12px !important;
-        padding: 0.8rem !important;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4) !important;
+    /* Tombol Custom untuk Buka Sidebar */
+    .custom-sidebar-toggle {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 999999;
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.2);
     }
     
-    button[kind="header"]:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5) !important;
+    .custom-sidebar-toggle:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.7);
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
     }
     
-    button[kind="header"] svg {
-        color: white !important;
-        fill: white !important;
+    .custom-sidebar-toggle svg {
+        width: 24px;
+        height: 24px;
+        fill: white;
     }
     </style>
+    
+    <div class="custom-sidebar-toggle" id="customSidebarToggle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </div>
+    
+    <script>
+    // Function untuk toggle sidebar
+    function toggleSidebar() {
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        const toggleButton = window.parent.document.querySelector('button[kind="header"]');
+        const customToggle = window.parent.document.getElementById('customSidebarToggle');
+        
+        // Coba klik tombol bawaan Streamlit dulu
+        if (toggleButton) {
+            toggleButton.click();
+            return;
+        }
+        
+        // Kalau tidak ada, manipulasi langsung
+        if (sidebar) {
+            const currentDisplay = window.getComputedStyle(sidebar).display;
+            if (currentDisplay === 'none' || sidebar.style.marginLeft === '-21rem') {
+                sidebar.style.display = 'block';
+                sidebar.style.marginLeft = '0';
+                if (customToggle) customToggle.style.display = 'none';
+            } else {
+                sidebar.style.marginLeft = '-21rem';
+                if (customToggle) customToggle.style.display = 'flex';
+            }
+        }
+    }
+    
+    // Monitor sidebar state
+    setInterval(function() {
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        const customToggle = window.parent.document.getElementById('customSidebarToggle');
+        
+        if (sidebar && customToggle) {
+            const sidebarVisible = window.getComputedStyle(sidebar).display !== 'none' && 
+                                  sidebar.style.marginLeft !== '-21rem';
+            customToggle.style.display = sidebarVisible ? 'none' : 'flex';
+        }
+    }, 100);
+    
+    // Attach click handler
+    setTimeout(function() {
+        const customToggle = window.parent.document.getElementById('customSidebarToggle');
+        if (customToggle) {
+            customToggle.onclick = toggleSidebar;
+        }
+    }, 500);
+    </script>
     """, unsafe_allow_html=True)
     
     st.markdown("""
