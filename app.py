@@ -929,7 +929,7 @@ class AntyLaundryKMeans:
                 labels[cluster_id] = {
                     'name': 'High Value Loyal',
                     'icon': '💎',
-                    'discount': 10,
+                    'discount': 15,
                     'priority': 2,
                     'description': f'Pelanggan SETIA dengan RFM Score tinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x.',
                     'criteria': f'✓ Ranking #2\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
@@ -939,7 +939,7 @@ class AntyLaundryKMeans:
                 labels[cluster_id] = {
                     'name': 'Regular Loyal',
                     'icon': '💚',
-                    'discount': 5,
+                    'discount': 15,
                     'priority': 3,
                     'description': f'Pelanggan REGULER dengan RFM Score menengah ({row["RFM_Score"]:.2f}/3.0).',
                     'criteria': f'✓ Ranking #3\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x'
@@ -949,7 +949,7 @@ class AntyLaundryKMeans:
                 labels[cluster_id] = {
                     'name': 'At Risk',
                     'icon': '⚠️',
-                    'discount': 7,
+                    'discount': 15,
                     'priority': 4,
                     'description': f'Pelanggan BERISIKO dengan RFM Score rendah ({row["RFM_Score"]:.2f}/3.0).',
                     'criteria': f'✓ Ranking #4\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari'
@@ -959,7 +959,7 @@ class AntyLaundryKMeans:
                 labels[cluster_id] = {
                     'name': 'Sleeping Customers',
                     'icon': '😴',
-                    'discount': 10,
+                    'discount': 15,
                     'priority': 5,
                     'description': f'Pelanggan TIDUR dengan RFM Score terendah ({row["RFM_Score"]:.2f}/3.0).',
                     'criteria': f'✓ Ranking #5\n✓ RFM Score: {row["RFM_Score"]:.2f}'
@@ -1143,10 +1143,10 @@ def main():
         st.markdown("### 🎯 Segmen Pelanggan")
         st.markdown("""
         🏆 **VIP Champions** → 15%  
-        💎 **High Value Loyal** → 10%  
-        💚 **Regular Loyal** → 5%  
-        ⚠️ **At Risk** → 7%  
-        😴 **Sleeping** → 10%
+        💎 **High Value Loyal** → 11%  
+        💚 **Regular Loyal** → 15%  
+        ⚠️ **At Risk** → 15%  
+        😴 **Sleeping** → 15%
         """)
         
         st.markdown("---")
@@ -1427,4 +1427,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
