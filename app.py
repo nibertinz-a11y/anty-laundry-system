@@ -16,7 +16,7 @@ st.set_page_config(
     page_title="Anty Laundry - K-Means Clustering",
     page_icon="🧺",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
 st.markdown("""
@@ -25,6 +25,23 @@ st.markdown("""
     
     * {
         font-family: 'Inter', sans-serif;
+    }
+    
+    /* PERBAIKAN: Pastikan toggle sidebar selalu visible */
+    button[kind="header"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Sidebar toggle button - always show */
+    section[data-testid="stSidebar"] > div:first-child {
+        position: relative !important;
+    }
+    
+    section[data-testid="stSidebar"] button[aria-label="Close sidebar"] {
+        display: block !important;
+        visibility: visible !important;
     }
     
     /* Hide Streamlit branding */
@@ -673,6 +690,21 @@ st.markdown("""
         background: rgba(139, 92, 246, 0.7);
     }
 </style>
+
+<script>
+// Force sidebar toggle to always be visible and functional
+document.addEventListener('DOMContentLoaded', function() {
+    const checkSidebarToggle = setInterval(() => {
+        const toggleButton = document.querySelector('button[kind="header"]');
+        if (toggleButton) {
+            toggleButton.style.display = 'block';
+            toggleButton.style.visibility = 'visible';
+            toggleButton.style.opacity = '1';
+            clearInterval(checkSidebarToggle);
+        }
+    }, 100);
+});
+</script>
 """, unsafe_allow_html=True)
 
 
