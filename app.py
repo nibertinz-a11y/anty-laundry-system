@@ -26,59 +26,7 @@ st.markdown("""
     * {
         font-family: 'Inter', sans-serif;
     }
-
-    /* ========== HAMBURGER MENU - GANTI TOMBOL << ========== */
     
-    /* Style tombol collapse sidebar bawaan */
-    button[kind="header"] {
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 12px !important;
-        width: 50px !important;
-        height: 50px !important;
-        padding: 0 !important;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4) !important;
-        transition: all 0.3s ease !important;
-        position: fixed !important;
-        top: 1rem !important;
-        left: 1rem !important;
-        z-index: 9999 !important;
-    }
-    
-    button[kind="header"]:hover {
-        transform: scale(1.05) !important;
-        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6) !important;
-        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
-    }
-    
-    /* Sembunyikan icon << asli */
-    button[kind="header"] svg {
-        display: none !important;
-    }
-    
-    /* Ganti dengan icon hamburger ☰ */
-    button[kind="header"]::before {
-        content: "☰" !important;
-        font-size: 1.8rem !important;
-        font-weight: 400 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Ketika sidebar collapse (tutup) */
-    button[kind="header"][aria-expanded="false"]::before {
-        content: "☰" !important;
-    }
-    
-    /* Ketika sidebar expand (buka) */
-    button[kind="header"][aria-expanded="true"]::before {
-        content: "×" !important;
-        font-size: 2.2rem !important;
-    }
-    
-    /* ========== END HAMBURGER MENU ========== */
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -1130,7 +1078,9 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
     output.seek(0)
     return output
 
+
 def main():
+    
     st.markdown("""
     <div class="main-header">
         <div class="logo-container">
@@ -1144,8 +1094,6 @@ def main():
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    add_hamburger_menu()
     
     with st.sidebar:
         st.markdown("""
