@@ -27,73 +27,58 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
 
-    /* ========== HAMBURGER MENU - TAMBAHAN BARU ========== */
-    .hamburger-btn {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 9999;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 0;
-        font-size: 1.8rem;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+    /* ========== HAMBURGER MENU - GANTI TOMBOL << ========== */
     
-    .hamburger-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
-    }
-    
+    /* Style tombol collapse sidebar bawaan */
     button[kind="header"] {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        width: 50px !important;
+        height: 50px !important;
+        padding: 0 !important;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4) !important;
+        transition: all 0.3s ease !important;
+        position: fixed !important;
+        top: 1rem !important;
+        left: 1rem !important;
+        z-index: 9999 !important;
+    }
+    
+    button[kind="header"]:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6) !important;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+    }
+    
+    /* Sembunyikan icon << asli */
+    button[kind="header"] svg {
         display: none !important;
     }
     
-    .sidebar-backdrop {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 9997;
+    /* Ganti dengan icon hamburger ☰ */
+    button[kind="header"]::before {
+        content: "☰" !important;
+        font-size: 1.8rem !important;
+        font-weight: 400 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     
-    .sidebar-backdrop.active {
-        display: block;
+    /* Ketika sidebar collapse (tutup) */
+    button[kind="header"][aria-expanded="false"]::before {
+        content: "☰" !important;
     }
     
-    @media (max-width: 768px) {
-        section[data-testid="stSidebar"] {
-            position: fixed !important;
-            left: -100% !important;
-            transition: left 0.3s ease !important;
-            z-index: 9998 !important;
-            width: 80% !important;
-            max-width: 320px !important;
-        }
-        
-        section[data-testid="stSidebar"][data-visible="true"] {
-            left: 0 !important;
-        }
+    /* Ketika sidebar expand (buka) */
+    button[kind="header"][aria-expanded="true"]::before {
+        content: "×" !important;
+        font-size: 2.2rem !important;
     }
     
-    @media (min-width: 769px) {
-        .hamburger-btn {
-            display: none !important;
-        }
-    }
     /* ========== END HAMBURGER MENU ========== */
-    
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -1145,22 +1130,14 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
     output.seek(0)
     return output
 
-def add_hamburger_menu():
-    """Hamburger menu toggle sidebar"""
+def main():
     st.markdown("""
-    <script>
-    const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-    const hamburger = document.createElement('div');
-    hamburger.innerHTML = '☰';
-    hamburger.style = 'position:fixed;top:1rem;left:1rem;z-index:9999;background:#6366f1;color:white;width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;';
-    hamburger.onclick = () => {
-        const visible = sidebar.style.marginLeft === '0px';
-        sidebar.style.marginLeft = visible ? '-21rem' : '0px';
-    };
-    window.parent.document.body.appendChild(hamburger);
-    </script>
+    <div class="main-header">
+        ...
+    </div>
     """, unsafe_allow_html=True)
-
+    
+    with st.sidebar:
 
 def main():
     st.markdown("""
