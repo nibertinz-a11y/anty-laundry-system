@@ -19,28 +19,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# INJECT CUSTOM CSS & JS UNTUK SIDEBAR TOGGLE PERMANEN
-st.markdown("""
-<script>
-// Pastikan toggle button selalu ada
-window.addEventListener('load', function() {
-    const observer = new MutationObserver(function() {
-        const collapseBtn = parent.document.querySelector('[data-testid="collapsedControl"]');
-        if (collapseBtn) {
-            collapseBtn.style.display = 'flex !important';
-            collapseBtn.style.visibility = 'visible !important';
-            collapseBtn.style.opacity = '1 !important';
-        }
-    });
-    
-    observer.observe(parent.document.body, {
-        childList: true,
-        subtree: true
-    });
-});
-</script>
-""", unsafe_allow_html=True)
-
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -53,49 +31,6 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-
- /* PASTIKAN SIDEBAR TOGGLE BUTTON SELALU TERLIHAT - FIXED */
-    button[kind="header"] {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        z-index: 999999 !important;
-        position: fixed !important;
-        top: 1rem !important;
-        left: 1rem !important;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
-        border-radius: 12px !important;
-        padding: 0.8rem !important;
-        width: 48px !important;
-        height: 48px !important;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5) !important;
-        transition: all 0.3s ease !important;
-        border: 2px solid rgba(255, 255, 255, 0.2) !important;
-    }
-    
-    button[kind="header"]:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.7) !important;
-        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
-    }
-    
-    button[kind="header"] svg {
-        color: white !important;
-        fill: white !important;
-        width: 20px !important;
-        height: 20px !important;
-    }
-    
-    /* Pastikan tombol tetap ada saat sidebar collapse */
-    [data-testid="collapsedControl"] {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        position: fixed !important;
-        top: 1rem !important;
-        left: 1rem !important;
-        z-index: 999999 !important;
-    }
     
     /* Dark background gradient */
     .stApp {
@@ -1159,9 +1094,6 @@ def main():
         </div>
     </div>
     """, unsafe_allow_html=True)
-        
-        
-        st.markdown("### ⚙️ Pengaturan Analisis")
     
     with st.sidebar:
         st.markdown("""
@@ -1170,7 +1102,6 @@ def main():
                  alt='Anty Laundry Logo'>
         </div>
         """, unsafe_allow_html=True)
-        
         
         st.markdown("### ⚙️ Pengaturan Analisis")
         months_back = st.selectbox(
