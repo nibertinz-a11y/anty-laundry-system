@@ -1146,21 +1146,19 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
     return output
 
 def add_hamburger_menu():
-    """Hamburger menu untuk toggle sidebar"""
+    """Hamburger menu toggle sidebar"""
     st.markdown("""
-    <button class="hamburger-btn" onclick="
-        const sidebar = window.parent.document.querySelector('[data-testid=\\'stSidebar\\']');
-        const backdrop = window.parent.document.querySelector('.sidebar-backdrop');
-        const isVisible = sidebar.getAttribute('data-visible') === 'true';
-        sidebar.setAttribute('data-visible', !isVisible);
-        if (backdrop) backdrop.classList.toggle('active');
-    ">☰</button>
-    
-    <div class="sidebar-backdrop" onclick="
-        const sidebar = window.parent.document.querySelector('[data-testid=\\'stSidebar\\']');
-        sidebar.setAttribute('data-visible', 'false');
-        this.classList.remove('active');
-    "></div>
+    <script>
+    const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+    const hamburger = document.createElement('div');
+    hamburger.innerHTML = '☰';
+    hamburger.style = 'position:fixed;top:1rem;left:1rem;z-index:9999;background:#6366f1;color:white;width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;';
+    hamburger.onclick = () => {
+        const visible = sidebar.style.marginLeft === '0px';
+        sidebar.style.marginLeft = visible ? '-21rem' : '0px';
+    };
+    window.parent.document.body.appendChild(hamburger);
+    </script>
     """, unsafe_allow_html=True)
 
 
