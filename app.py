@@ -1159,64 +1159,9 @@ def main():
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    with st.sidebar:
-        st.markdown("""
-        <div class="sidebar-logo">
-            <img src='https://i.imgur.com/BP3MK3t.jpeg' 
-                 alt='Anty Laundry Logo'>
-        </div>
-        """, unsafe_allow_html=True)
         
-        // Kalau tidak ada, manipulasi langsung
-        if (sidebar) {
-            const currentDisplay = window.getComputedStyle(sidebar).display;
-            if (currentDisplay === 'none' || sidebar.style.marginLeft === '-21rem') {
-                sidebar.style.display = 'block';
-                sidebar.style.marginLeft = '0';
-                if (customToggle) customToggle.style.display = 'none';
-            } else {
-                sidebar.style.marginLeft = '-21rem';
-                if (customToggle) customToggle.style.display = 'flex';
-            }
-        }
-    }
-    
-    // Monitor sidebar state
-    setInterval(function() {
-        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-        const customToggle = window.parent.document.getElementById('customSidebarToggle');
         
-        if (sidebar && customToggle) {
-            const sidebarVisible = window.getComputedStyle(sidebar).display !== 'none' && 
-                                  sidebar.style.marginLeft !== '-21rem';
-            customToggle.style.display = sidebarVisible ? 'none' : 'flex';
-        }
-    }, 100);
-    
-    // Attach click handler
-    setTimeout(function() {
-        const customToggle = window.parent.document.getElementById('customSidebarToggle');
-        if (customToggle) {
-            customToggle.onclick = toggleSidebar;
-        }
-    }, 500);
-    </script>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="main-header">
-        <div class="logo-container">
-            <img src='https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDZqeHY5cWl3bTF1d2p4dDF6NGw1dHUwcG1yb3M2aTl6Nmd3dXZwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/jowM6pSgsD9TwLqwje/giphy.gif' 
-                 class='logo-img'
-                 alt='Anty Laundry Logo'>
-            <div class="header-text">
-                <h1>🧺 ANTY LAUNDRY</h1>
-                <h3>Sistem Segmentasi Pelanggan - K-Means Clustering</h3>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown("### ⚙️ Pengaturan Analisis")
     
     with st.sidebar:
         st.markdown("""
