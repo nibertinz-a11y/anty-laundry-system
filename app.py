@@ -1165,7 +1165,6 @@ def add_hamburger_menu():
 
 
 def main():
-    
     st.markdown("""
     <div class="main-header">
         <div class="logo-container">
@@ -1180,9 +1179,7 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-        add_hamburger_menu()
-    
-    with st.sidebar:
+    add_hamburger_menu()
     
     with st.sidebar:
         st.markdown("""
