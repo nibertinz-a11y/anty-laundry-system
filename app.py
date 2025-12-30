@@ -26,6 +26,73 @@ st.markdown("""
     * {
         font-family: 'Inter', sans-serif;
     }
+
+    /* ========== HAMBURGER MENU - TAMBAHAN BARU ========== */
+    .hamburger-btn {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 9999;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0;
+        font-size: 1.8rem;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .hamburger-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+    }
+    
+    button[kind="header"] {
+        display: none !important;
+    }
+    
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9997;
+    }
+    
+    .sidebar-backdrop.active {
+        display: block;
+    }
+    
+    @media (max-width: 768px) {
+        section[data-testid="stSidebar"] {
+            position: fixed !important;
+            left: -100% !important;
+            transition: left 0.3s ease !important;
+            z-index: 9998 !important;
+            width: 80% !important;
+            max-width: 320px !important;
+        }
+        
+        section[data-testid="stSidebar"][data-visible="true"] {
+            left: 0 !important;
+        }
+    }
+    
+    @media (min-width: 769px) {
+        .hamburger-btn {
+            display: none !important;
+        }
+    }
+    /* ========== END HAMBURGER MENU ========== */
     
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
@@ -1078,6 +1145,24 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
     output.seek(0)
     return output
 
+def add_hamburger_menu():
+    """Hamburger menu untuk toggle sidebar"""
+    st.markdown("""
+    <button class="hamburger-btn" onclick="
+        const sidebar = window.parent.document.querySelector('[data-testid=\\'stSidebar\\']');
+        const backdrop = window.parent.document.querySelector('.sidebar-backdrop');
+        const isVisible = sidebar.getAttribute('data-visible') === 'true';
+        sidebar.setAttribute('data-visible', !isVisible);
+        if (backdrop) backdrop.classList.toggle('active');
+    ">☰</button>
+    
+    <div class="sidebar-backdrop" onclick="
+        const sidebar = window.parent.document.querySelector('[data-testid=\\'stSidebar\\']');
+        sidebar.setAttribute('data-visible', 'false');
+        this.classList.remove('active');
+    "></div>
+    """, unsafe_allow_html=True)
+
 
 def main():
     
@@ -1094,6 +1179,10 @@ def main():
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+        add_hamburger_menu()
+    
+    with st.sidebar:
     
     with st.sidebar:
         st.markdown("""
