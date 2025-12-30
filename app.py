@@ -19,6 +19,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# INJECT CUSTOM CSS & JS UNTUK SIDEBAR TOGGLE PERMANEN
+st.markdown("""
+<script>
+// Pastikan toggle button selalu ada
+window.addEventListener('load', function() {
+    const observer = new MutationObserver(function() {
+        const collapseBtn = parent.document.querySelector('[data-testid="collapsedControl"]');
+        if (collapseBtn) {
+            collapseBtn.style.display = 'flex !important';
+            collapseBtn.style.visibility = 'visible !important';
+            collapseBtn.style.opacity = '1 !important';
+        }
+    });
+    
+    observer.observe(parent.document.body, {
+        childList: true,
+        subtree: true
+    });
+});
+</script>
+""", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -31,6 +53,49 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
+
+ /* PASTIKAN SIDEBAR TOGGLE BUTTON SELALU TERLIHAT - FIXED */
+    button[kind="header"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 999999 !important;
+        position: fixed !important;
+        top: 1rem !important;
+        left: 1rem !important;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        border-radius: 12px !important;
+        padding: 0.8rem !important;
+        width: 48px !important;
+        height: 48px !important;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5) !important;
+        transition: all 0.3s ease !important;
+        border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    button[kind="header"]:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 12px 35px rgba(99, 102, 241, 0.7) !important;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+    }
+    
+    button[kind="header"] svg {
+        color: white !important;
+        fill: white !important;
+        width: 20px !important;
+        height: 20px !important;
+    }
+    
+    /* Pastikan tombol tetap ada saat sidebar collapse */
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        top: 1rem !important;
+        left: 1rem !important;
+        z-index: 999999 !important;
+    }
     
     /* Dark background gradient */
     .stApp {
@@ -1102,6 +1167,65 @@ def main():
                  alt='Anty Laundry Logo'>
         </div>
         """, unsafe_allow_html=True)
+        
+        // Kalau tidak ada, manipulasi langsung
+        if (sidebar) {
+            const currentDisplay = window.getComputedStyle(sidebar).display;
+            if (currentDisplay === 'none' || sidebar.style.marginLeft === '-21rem') {
+                sidebar.style.display = 'block';
+                sidebar.style.marginLeft = '0';
+                if (customToggle) customToggle.style.display = 'none';
+            } else {
+                sidebar.style.marginLeft = '-21rem';
+                if (customToggle) customToggle.style.display = 'flex';
+            }
+        }
+    }
+    
+    // Monitor sidebar state
+    setInterval(function() {
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        const customToggle = window.parent.document.getElementById('customSidebarToggle');
+        
+        if (sidebar && customToggle) {
+            const sidebarVisible = window.getComputedStyle(sidebar).display !== 'none' && 
+                                  sidebar.style.marginLeft !== '-21rem';
+            customToggle.style.display = sidebarVisible ? 'none' : 'flex';
+        }
+    }, 100);
+    
+    // Attach click handler
+    setTimeout(function() {
+        const customToggle = window.parent.document.getElementById('customSidebarToggle');
+        if (customToggle) {
+            customToggle.onclick = toggleSidebar;
+        }
+    }, 500);
+    </script>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="main-header">
+        <div class="logo-container">
+            <img src='https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDZqeHY5cWl3bTF1d2p4dDF6NGw1dHUwcG1yb3M2aTl6Nmd3dXZwOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/jowM6pSgsD9TwLqwje/giphy.gif' 
+                 class='logo-img'
+                 alt='Anty Laundry Logo'>
+            <div class="header-text">
+                <h1>🧺 ANTY LAUNDRY</h1>
+                <h3>Sistem Segmentasi Pelanggan - K-Means Clustering</h3>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.sidebar:
+        st.markdown("""
+        <div class="sidebar-logo">
+            <img src='https://i.imgur.com/BP3MK3t.jpeg' 
+                 alt='Anty Laundry Logo'>
+        </div>
+        """, unsafe_allow_html=True)
+        
         
         st.markdown("### ⚙️ Pengaturan Analisis")
         months_back = st.selectbox(
