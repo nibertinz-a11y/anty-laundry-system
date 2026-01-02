@@ -934,52 +934,51 @@ class AntyLaundryKMeans:
             
             if rank == 1:
                 labels[cluster_id] = {
-                    'name': 'VIP Champions',
+                    'name': 'VIP Customer',
                     'icon': '🏆',
                     'discount': 15,
                     'priority': 1,
-                    'description': f'Pelanggan TERBAIK dengan RFM Score tertinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu.',
-                    'criteria': f'✓ Ranking #1 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (tertinggi)\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+                    'description': f'Pelanggan VIP dengan transaksi sangat tinggi dan sangat aktif. RFM Score tertinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu.',
+                    'criteria': f'✓ Ranking #1 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (tertinggi)\n✓ Recency: {row["Avg_Recency"]:.0f} hari (sangat aktif)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x (sangat tinggi)\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f} (sangat tinggi)'
                 }
             
             elif rank == 2:
                 labels[cluster_id] = {
-                    'name': 'High Value Loyal',
+                    'name': 'Top Spender',
                     'icon': '💎',
                     'discount': 15,
                     'priority': 2,
-                    'description': f'Pelanggan SETIA dengan RFM Score tinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x.',
-                    'criteria': f'✓ Ranking #2\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
+                    'description': f'Pelanggan dengan nilai belanja tertinggi. RFM Score tinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x.',
+                    'criteria': f'✓ Ranking #2\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f} (tinggi)'
                 }
-            
             elif rank == 3:
                 labels[cluster_id] = {
-                    'name': 'Regular Loyal',
+                    'name': 'High Value Customer',
                     'icon': '💚',
                     'discount': 15,
                     'priority': 3,
-                    'description': f'Pelanggan REGULER dengan RFM Score menengah ({row["RFM_Score"]:.2f}/3.0).',
-                    'criteria': f'✓ Ranking #3\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x'
+                    'description': f'Pelanggan bernilai tinggi dengan potensi berkembang. RFM Score menengah-tinggi ({row["RFM_Score"]:.2f}/3.0).',
+                    'criteria': f'✓ Ranking #3\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
                 }
             
             elif rank == 4:
                 labels[cluster_id] = {
-                    'name': 'At Risk',
+                    'name': 'Pelanggan Reguler',
                     'icon': '⚠️',
                     'discount': 15,
                     'priority': 4,
-                    'description': f'Pelanggan BERISIKO dengan RFM Score rendah ({row["RFM_Score"]:.2f}/3.0).',
-                    'criteria': f'✓ Ranking #4\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari'
+                    'description': f'Pelanggan dengan transaksi rutin namun nilai sedang. RFM Score menengah ({row["RFM_Score"]:.2f}/3.0).',
+                    'criteria': f'✓ Ranking #4\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
                 }
             
             else:
                 labels[cluster_id] = {
-                    'name': 'Sleeping Customers',
+                    'name': 'Pelanggan Tidak Aktif',
                     'icon': '😴',
                     'discount': 15,
                     'priority': 5,
-                    'description': f'Pelanggan TIDUR dengan RFM Score terendah ({row["RFM_Score"]:.2f}/3.0).',
-                    'criteria': f'✓ Ranking #5\n✓ RFM Score: {row["RFM_Score"]:.2f}'
+                    'description': f'Pelanggan yang sudah lama tidak bertransaksi. RFM Score terendah ({row["RFM_Score"]:.2f}/3.0). Perlu strategi re-engagement.',
+                    'criteria': f'✓ Ranking #5\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari (tidak aktif)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x (rendah)\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
                 }
         
         rfm_df['Segment'] = rfm_df['Cluster'].map(lambda x: labels[x]['name'])
@@ -993,12 +992,12 @@ class AntyLaundryKMeans:
     
     def get_top_10_customers(self, rfm_df):
         """Pilih TOP 10 pelanggan untuk diskon"""
-        top_segments = rfm_df[rfm_df['Segment'].isin(['VIP Champions', 'High Value Loyal'])]
+        top_segments = rfm_df[rfm_df['Segment'].isin(['VIP Customer', 'Top Spender'])]
         top_10 = top_segments.nlargest(10, 'Monetary')
         
         if len(top_10) < 10:
             remaining = 10 - len(top_10)
-            regular = rfm_df[rfm_df['Segment'] == 'Regular Loyal'].nlargest(remaining, 'Monetary')
+            regular = rfm_df[rfm_df['Segment'] == 'High Value Customer'].nlargest(remaining, 'Monetary')
             top_10 = pd.concat([top_10, regular])
         
         if len(top_10) < 10:
@@ -1159,11 +1158,11 @@ def main():
         
         st.markdown("### 🎯 Segmen Pelanggan")
         st.markdown("""
-        🏆 **VIP Champions** → 15%  
-        💎 **High Value Loyal** → 15%  
-        💚 **Regular Loyal** → 15%  
-        ⚠️ **At Risk** → 15%  
-        😴 **Sleeping** → 15%
+        🏆 **VIP Customer** → 15%  
+        💎 **Top Spender** → 15%  
+        💚 **High Value Customer** → 15%  
+        ⚠️ **Pelanggan Reguler** → 15%  
+        😴 **Pelanggan Tidak Aktif** → 15%
         """)
         
         st.markdown("---")
@@ -1377,8 +1376,8 @@ def main():
                 st.metric("Periode Data", period)
             
             with col4:
-                vip_count = len(rfm[rfm['Segment'] == 'VIP Champions'])
-                st.metric("VIP Champions", vip_count, delta="🏆")
+                vip_count = len(rfm[rfm['Segment'] == 'VIP Customer'])
+                st.metric("VIP Customer", vip_count, delta="🏆")
             
             st.markdown("---")
             
@@ -1444,7 +1443,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
 
