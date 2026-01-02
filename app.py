@@ -964,7 +964,7 @@ class AntyLaundryKMeans:
             elif rank == 4:
                 labels[cluster_id] = {
                     'name': 'Pelanggan Reguler',
-                    'icon': '⚠️',
+                    'icon': '👥',
                     'discount': 15,
                     'priority': 4,
                     'description': f'Pelanggan dengan transaksi rutin namun nilai sedang. RFM Score menengah ({row["RFM_Score"]:.2f}/3.0).',
@@ -1161,7 +1161,7 @@ def main():
         🏆 **VIP Customer** → 15%  
         💎 **Top Spender** → 15%  
         💚 **High Value Customer** → 15%  
-        ⚠️ **Pelanggan Reguler** → 15%  
+        👥 **Pelanggan Reguler** → 15%  
         😴 **Pelanggan Tidak Aktif** → 15%
         """)
         
@@ -1443,6 +1443,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
