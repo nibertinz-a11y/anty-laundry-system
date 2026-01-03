@@ -936,7 +936,7 @@ class AntyLaundryKMeans:
                 labels[cluster_id] = {
                     'name': 'VIP Customer',
                     'icon': '🏆',
-                    'discount': 15,
+                    'discount': 10,
                     'priority': 1,
                     'description': f'Pelanggan VIP dengan transaksi sangat tinggi dan sangat aktif. RFM Score tertinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x, terakhir {row["Avg_Recency"]:.0f} hari lalu.',
                     'criteria': f'✓ Ranking #1 dari 5 cluster\n✓ RFM Score: {row["RFM_Score"]:.2f} (tertinggi)\n✓ Recency: {row["Avg_Recency"]:.0f} hari (sangat aktif)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x (sangat tinggi)\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f} (sangat tinggi)'
@@ -946,7 +946,7 @@ class AntyLaundryKMeans:
                 labels[cluster_id] = {
                     'name': 'Top Spender',
                     'icon': '💎',
-                    'discount': 15,
+                    'discount': 10,
                     'priority': 2,
                     'description': f'Pelanggan dengan nilai belanja tertinggi. RFM Score tinggi ({row["RFM_Score"]:.2f}/3.0). Rata-rata belanja Rp{row["Avg_Monetary"]:,.0f}, transaksi {row["Avg_Frequency"]:.1f}x.',
                     'criteria': f'✓ Ranking #2\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f} (tinggi)'
@@ -955,7 +955,7 @@ class AntyLaundryKMeans:
                 labels[cluster_id] = {
                     'name': 'High Value Customer',
                     'icon': '💚',
-                    'discount': 15,
+                    'discount': 10,
                     'priority': 3,
                     'description': f'Pelanggan bernilai tinggi dengan potensi berkembang. RFM Score menengah-tinggi ({row["RFM_Score"]:.2f}/3.0).',
                     'criteria': f'✓ Ranking #3\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
@@ -965,7 +965,7 @@ class AntyLaundryKMeans:
                 labels[cluster_id] = {
                     'name': 'Pelanggan Reguler',
                     'icon': '⚠️',
-                    'discount': 15,
+                    'discount': 10,
                     'priority': 4,
                     'description': f'Pelanggan dengan transaksi rutin namun nilai sedang. RFM Score menengah ({row["RFM_Score"]:.2f}/3.0).',
                     'criteria': f'✓ Ranking #4\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari\n✓ Frequency: {row["Avg_Frequency"]:.1f}x\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
@@ -975,7 +975,7 @@ class AntyLaundryKMeans:
                 labels[cluster_id] = {
                     'name': 'Pelanggan Tidak Aktif',
                     'icon': '😴',
-                    'discount': 15,
+                    'discount': 10,
                     'priority': 5,
                     'description': f'Pelanggan yang sudah lama tidak bertransaksi. RFM Score terendah ({row["RFM_Score"]:.2f}/3.0). Perlu strategi re-engagement.',
                     'criteria': f'✓ Ranking #5\n✓ RFM Score: {row["RFM_Score"]:.2f}\n✓ Recency: {row["Avg_Recency"]:.0f} hari (tidak aktif)\n✓ Frequency: {row["Avg_Frequency"]:.1f}x (rendah)\n✓ Monetary: Rp{row["Avg_Monetary"]:,.0f}'
@@ -1158,11 +1158,11 @@ def main():
         
         st.markdown("### 🎯 Segmen Pelanggan")
         st.markdown("""
-        🏆 **VIP Customer** → 15%  
-        💎 **Top Spender** → 15%  
-        💚 **High Value Customer** → 15%  
-        👥 **Pelanggan Reguler** → 15%  
-        😴 **Pelanggan Tidak Aktif** → 15%
+        🏆 **VIP Customer** → 10%  
+        💎 **Top Spender** → 10%  
+        💚 **High Value Customer** → 10%  
+        👥 **Pelanggan Reguler** → 10%  
+        😴 **Pelanggan Tidak Aktif** → 10%
         """)
         
         st.markdown("---")
@@ -1443,5 +1443,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
