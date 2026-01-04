@@ -27,21 +27,103 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
     
-    /* PERBAIKAN: Pastikan toggle sidebar selalu visible dan berfungsi */
+    /* ============================================================
+       CRITICAL FIX: SIDEBAR TOGGLE BUTTON - ULTIMATE SOLUTION
+       ============================================================ */
+    
+    /* Tombol BUKA sidebar (setelah ditutup) - PALING PENTING! */
     [data-testid="collapsedControl"] {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         position: fixed !important;
-        left: 0 !important;
-        top: 0.5rem !important;
-        z-index: 999999 !important;
+        left: 1rem !important;
+        top: 1rem !important;
+        z-index: 999999999 !important;
+        pointer-events: auto !important;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem !important;
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.6) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        transition: all 0.3s ease !important;
+        width: auto !important;
+        height: auto !important;
+        min-width: 50px !important;
+        min-height: 50px !important;
     }
     
-    /* Tombol X close sidebar juga harus visible */
-    [data-testid="stSidebar"] button[kind="header"] {
+    [data-testid="collapsedControl"]:hover {
+        transform: scale(1.15) !important;
+        box-shadow: 0 12px 36px rgba(99, 102, 241, 0.8) !important;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+    }
+    
+    /* FORCE OVERRIDE - Paksa tampil meski ada inline style */
+    [data-testid="collapsedControl"][style*="display"],
+    [data-testid="collapsedControl"][style*="visibility"],
+    [data-testid="collapsedControl"][style*="opacity"],
+    [data-testid="collapsedControl"][style] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Button & SVG di dalam collapsedControl */
+    [data-testid="collapsedControl"] button,
+    [data-testid="collapsedControl"] > button {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        color: white !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    [data-testid="collapsedControl"] svg,
+    [data-testid="collapsedControl"] button svg {
         display: block !important;
         visibility: visible !important;
+        opacity: 1 !important;
+        width: 28px !important;
+        height: 28px !important;
+        color: white !important;
+        fill: white !important;
+    }
+    
+    /* Tombol TUTUP sidebar (X) di dalam sidebar */
+    [data-testid="stSidebar"] button[kind="header"],
+    section[data-testid="stSidebar"] button[kind="header"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        z-index: 999999 !important;
+        pointer-events: auto !important;
+    }
+    
+    /* Sidebar container */
+    [data-testid="stSidebar"],
+    section[data-testid="stSidebar"] {
+        pointer-events: auto !important;
+        z-index: 999998 !important;
+    }
+    
+    /* Alternative selectors untuk versi Streamlit berbeda */
+    .css-1dp5vir,
+    .css-nahz7x,
+    div[data-testid="collapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        left: 1rem !important;
+        top: 1rem !important;
+        z-index: 999999999 !important;
     }
     
     /* Hide Streamlit branding */
@@ -690,6 +772,81 @@ st.markdown("""
         background: rgba(139, 92, 246, 0.7);
     }
 </style>
+
+<script>
+(function() {
+    'use strict';
+    
+    function forceSidebarVisible() {
+        const selectors = [
+            '[data-testid="collapsedControl"]',
+            'button[kind="header"]',
+            '.css-1dp5vir',
+            '.css-nahz7x'
+        ];
+        
+        selectors.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                const isInsideSidebar = el.closest('[data-testid="stSidebar"]');
+                
+                if (!isInsideSidebar) {
+                    el.style.cssText = `
+                        display: flex !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        position: fixed !important;
+                        left: 1rem !important;
+                        top: 1rem !important;
+                        z-index: 999999999 !important;
+                        pointer-events: auto !important;
+                        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+                        border-radius: 12px !important;
+                        padding: 0.75rem !important;
+                        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.6) !important;
+                        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+                        min-width: 50px !important;
+                        min-height: 50px !important;
+                    `;
+                    
+                    const btn = el.querySelector('button');
+                    if (btn) {
+                        btn.style.display = 'flex';
+                        btn.style.visibility = 'visible';
+                        btn.style.opacity = '1';
+                        btn.style.pointerEvents = 'auto';
+                        btn.style.color = 'white';
+                    }
+                    
+                    const svgs = el.querySelectorAll('svg');
+                    svgs.forEach(svg => {
+                        svg.style.display = 'block';
+                        svg.style.visibility = 'visible';
+                        svg.style.opacity = '1';
+                        svg.style.color = 'white';
+                        svg.style.fill = 'white';
+                        svg.style.width = '28px';
+                        svg.style.height = '28px';
+                    });
+                }
+            });
+        });
+    }
+    
+    window.addEventListener('load', forceSidebarVisible);
+    setInterval(forceSidebarVisible, 500);
+    
+    const observer = new MutationObserver(forceSidebarVisible);
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+    });
+    
+    window.addEventListener('resize', forceSidebarVisible);
+})();
+</script>
 """, unsafe_allow_html=True)
 
 
@@ -1443,6 +1600,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
