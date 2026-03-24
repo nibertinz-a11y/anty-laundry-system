@@ -378,6 +378,26 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+BULAN_ID = {
+    'januari': 'January', 'februari': 'February', 'maret': 'March',
+    'april': 'April', 'mei': 'May', 'juni': 'June', 'juli': 'July',
+    'agustus': 'August', 'september': 'September', 'oktober': 'October',
+    'november': 'November', 'desember': 'December'
+}
+
+def parse_tanggal_id(series):
+    def convert(val):
+        if pd.isna(val):
+            return pd.NaT
+        s = str(val).strip()
+        for id_, en in BULAN_ID.items():
+            if id_ in s.lower():
+                s = s.lower().replace(id_, en)
+                break
+        return pd.to_datetime(s, errors='coerce')
+    return series.apply(convert)
+
+
 class AntyLaundryKMeans:
     
     def __init__(self):
@@ -463,20 +483,23 @@ class AntyLaundryKMeans:
                 st.warning(f"{before - after} transaksi berstatus Batal dihapus")
         
         try:
-            df['Tanggal'] = pd.to_datetime(df['Tanggal'], errors='coerce')
-            
+            df['Tanggal'] = parse_tanggal_id(df['Tanggal'])
+
             if 'Tanggal_Order' in df.columns:
-                df['Tanggal_Order'] = pd.to_datetime(df['Tanggal_Order'], errors='coerce')
+                df['Tanggal_Order'] = parse_tanggal_id(df['Tanggal_Order'])
                 df['Tanggal'] = df['Tanggal'].fillna(df['Tanggal_Order'])
-            
+
             df = df.dropna(subset=['Tanggal'])
         except Exception as e:
             st.error(f"Error parsing tanggal: {str(e)}")
             return None
-        
+
         max_date = df['Tanggal'].max()
+        if pd.isna(max_date):
+            st.error("Semua nilai tanggal gagal diparse. Periksa format kolom Tanggal Ambil.")
+            return None
         cutoff_date = max_date - timedelta(days=30 * months_back)
-        
+
         st.info(f"Tanggal maksimal: {max_date.strftime('%d/%m/%Y')}")
         st.info(f"Filter dari: {cutoff_date.strftime('%d/%m/%Y')}")
         
