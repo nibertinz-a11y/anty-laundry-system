@@ -91,14 +91,15 @@ st.markdown("""
             gap: 2.5rem;
         }
     }
-    
+
+    /* DIUBAH: hapus background putih, padding, border-radius, dan shadow pada logo */
     .logo-img {
         height: 55px;
         width: 55px;
-        border-radius: 14px;
-        background: white;
-        padding: 8px;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        border-radius: 0;
+        background: transparent;
+        padding: 0;
+        box-shadow: none;
         object-fit: contain;
         flex-shrink: 0;
     }
@@ -107,8 +108,9 @@ st.markdown("""
         .logo-img {
             height: 90px;
             width: 90px;
-            border-radius: 20px;
-            padding: 12px;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
         }
     }
     
@@ -686,7 +688,6 @@ class AntyLaundryKMeans:
 
 def create_cluster_distribution_chart(rfm_df):
     cluster_counts = rfm_df['Segment'].value_counts()
-    
     fig = px.pie(
         values=cluster_counts.values,
         names=cluster_counts.index,
@@ -694,7 +695,6 @@ def create_cluster_distribution_chart(rfm_df):
         hole=0.4,
         color_discrete_sequence=px.colors.qualitative.Set3
     )
-    
     fig.update_traces(textposition='inside', textinfo='percent+label')
     return fig
 
@@ -721,13 +721,11 @@ def generate_default_whatsapp_message(top_10):
     message = "*SELAMAT PELANGGAN SETIA ANTY LAUNDRY!*\n\n"
     message += "Anda terpilih sebagai TOP 10 pelanggan terbaik bulan ini!\n\n"
     message += "Sebagai apresiasi, Anda berhak mendapat DISKON SPESIAL:\n\n"
-    
     for idx, (_, row) in enumerate(top_10.iterrows(), 1):
         message += f"{idx}. *{row['Konsumen']}*\n"
         message += f"   Segmen: {row['Segment']}\n"
         message += f"   Diskon: *{row['Discount']}%*\n"
         message += f"   Total Belanja: Rp {row['Monetary']:,.0f}\n\n"
-    
     message += "Berlaku: Bulan depan untuk semua layanan\n"
     message += "Cara pakai: Tunjukkan pesan ini saat transaksi\n\n"
     message += "Terima kasih telah mempercayai ANTY LAUNDRY!\n\n"
@@ -735,7 +733,6 @@ def generate_default_whatsapp_message(top_10):
     message += "ANTY LAUNDRY\n"
     message += "Tomohon, Sulawesi Utara\n"
     message += "Telp: [Isi nomor telepon]"
-    
     return message
 
 
@@ -746,7 +743,6 @@ def create_whatsapp_link(message):
 
 def export_to_excel(rfm_df, top_10, cluster_summary):
     output = BytesIO()
-    
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         top_10_export = top_10[['Konsumen', 'Segment', 'Recency', 'Frequency', 'Monetary', 'Discount']].copy()
         top_10_export.columns = ['Nama Pelanggan', 'Segmen', 'Recency (hari)', 'Frequency (x)', 'Total Belanja (Rp)', 'Diskon (%)']
@@ -757,13 +753,12 @@ def export_to_excel(rfm_df, top_10, cluster_summary):
         all_customers.to_excel(writer, sheet_name='Semua Pelanggan', index=False)
         
         cluster_summary.to_excel(writer, sheet_name='Ringkasan Cluster', index=False)
-    
     output.seek(0)
     return output
 
 
 def main():
-    
+
     st.markdown("""
     <div class="main-header">
         <div class="logo-container">
@@ -778,23 +773,17 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    col_setting, col_spacer = st.columns([1, 3])
-    with col_setting:
-        months_back = st.selectbox(
-            "Periode Data:",
-            options=[1, 2, 3, 6, 12],
-            index=0,
-            help="Pilih berapa bulan terakhir yang akan dianalisis"
-        )
-    
+    # DIUBAH: Periode data disembunyikan dari tampilan, default 1 bulan
+    months_back = 1
+
     st.markdown("## Upload Data Transaksi")
-    
+
     uploaded_file = st.file_uploader(
         "Upload file Excel/CSV dari aplikasi kasir",
         type=['xlsx', 'xls', 'csv'],
         help="File harus memiliki kolom: Tanggal Ambil, Konsumen, Total Harga"
     )
-    
+
     if uploaded_file:
         try:
             if uploaded_file.name.endswith('.csv'):
@@ -804,76 +793,76 @@ def main():
                     df_raw = pd.read_excel(uploaded_file, engine='openpyxl')
                 except Exception:
                     df_raw = pd.read_excel(uploaded_file)
-            
+
             st.success(f"File berhasil dimuat: {uploaded_file.name}")
             st.info(f"Total baris data: {len(df_raw)}")
-            
+
             with st.expander("Preview Data (10 baris pertama)"):
                 st.dataframe(df_raw.head(10))
-            
+
             if st.button("Jalankan Analisis K-Means", type="primary", use_container_width=True):
-                
+
                 with st.spinner("Sedang memproses data..."):
-                    
+
                     engine = AntyLaundryKMeans()
-                    
+
                     st.markdown("### Step 1: Membersihkan dan Filter Data")
                     df_clean = engine.load_and_clean_data(df_raw, months_back=months_back)
-                    
+
                     if df_clean is None:
                         st.error("Gagal memproses data!")
                         st.stop()
-                    
+
                     st.markdown("### Step 2: Menghitung RFM")
                     rfm = engine.calculate_rfm(df_clean)
-                    
+
                     st.markdown("### Step 3: Normalisasi Data")
                     rfm = engine.normalize_data(rfm)
                     st.success("Data berhasil dinormalisasi")
-                    
+
                     st.markdown("### Step 4: K-Means Clustering")
                     rfm = engine.run_kmeans(rfm)
-                    
+
                     st.markdown("### Step 5: Labeling Cluster")
                     rfm, cluster_labels = engine.label_clusters(rfm)
                     st.success("Cluster berhasil dilabeli")
-                    
+
                     st.markdown("### Step 6: Memilih TOP 10")
                     top_10 = engine.get_top_10_customers(rfm)
                     st.success(f"{len(top_10)} pelanggan terpilih")
-                    
+
                     st.session_state['rfm_result'] = rfm
                     st.session_state['top_10'] = top_10
                     st.session_state['cluster_labels'] = cluster_labels
                     st.session_state['df_clean'] = df_clean
-                
+
                 st.success("Analisis selesai!")
                 st.balloons()
                 st.rerun()
-        
+
         except Exception as e:
             st.error(f"Error: {str(e)}")
             st.exception(e)
             st.stop()
-    
+
     if 'rfm_result' in st.session_state:
-        
+
         rfm = st.session_state['rfm_result']
         top_10 = st.session_state['top_10']
         cluster_labels = st.session_state['cluster_labels']
         df_clean = st.session_state['df_clean']
-        
+
         st.markdown("---")
-        
+
         st.markdown("## TOP 10 Pelanggan Loyal - Dapat Diskon!")
-        
+
         st.success("Pelanggan terbaik bulan ini! Bagikan sekarang.")
-        
+
         top_10_display = top_10.copy()
         top_10_display['Rank'] = [f'#{i}' for i in range(1, 11)]
         top_10_display['Monetary_Formatted'] = top_10_display['Monetary'].apply(lambda x: f"Rp {x:,.0f}")
         top_10_display['Discount_Badge'] = top_10_display['Discount'].apply(lambda x: f"{x}%")
-        
+
         st.dataframe(
             top_10_display[['Rank', 'Konsumen', 'Segment', 'Frequency', 'Monetary_Formatted', 'Discount_Badge']]
             .rename(columns={
@@ -888,16 +877,16 @@ def main():
             hide_index=True,
             height=420
         )
-        
+
         st.markdown("---")
-        
+
         st.markdown("### Bagikan Sekarang")
-        
+
         if 'wa_message' not in st.session_state:
             st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
-        
+
         col1, col2, col3 = st.columns([1, 1, 1])
-        
+
         with col1:
             wa_link = create_whatsapp_link(st.session_state['wa_message'])
             st.link_button(
@@ -906,7 +895,7 @@ def main():
                 use_container_width=True,
                 type="primary"
             )
-        
+
         with col2:
             cluster_summary = rfm.groupby('Segment').agg({
                 'Konsumen': 'count',
@@ -915,11 +904,9 @@ def main():
                 'Monetary': 'mean',
                 'Discount': 'first'
             }).reset_index()
-            
             cluster_summary.columns = ['Segmen', 'Jumlah Pelanggan', 'Avg Recency', 'Avg Frequency', 'Avg Monetary', 'Diskon (%)']
-            
+
             excel_data = export_to_excel(rfm, top_10, cluster_summary)
-            
             st.download_button(
                 label="Download Excel",
                 data=excel_data,
@@ -927,10 +914,9 @@ def main():
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True
             )
-        
+
         with col3:
             csv = top_10[['Konsumen', 'Segment', 'Recency', 'Frequency', 'Monetary', 'Discount']].to_csv(index=False)
-            
             st.download_button(
                 label="Download CSV",
                 data=csv,
@@ -938,9 +924,8 @@ def main():
                 mime="text/csv",
                 use_container_width=True
             )
-        
+
         with st.expander("Edit Pesan WhatsApp (opsional)", expanded=False):
-            
             edited_message = st.text_area(
                 "Pesan WhatsApp",
                 value=st.session_state['wa_message'],
@@ -949,87 +934,73 @@ def main():
                 key="wa_message_editor",
                 label_visibility="collapsed"
             )
-            
             if st.button("Update Pesan", use_container_width=True):
                 st.session_state['wa_message'] = edited_message
                 st.success("Pesan berhasil diupdate!")
                 st.rerun()
-        
+
         st.markdown("---")
-        
+
         with st.expander("Lihat Ringkasan dan Statistik Lengkap", expanded=False):
-            
+
             st.markdown("### Ringkasan Analisis")
-            
+
             col1, col2 = st.columns(2)
             col3, col4 = st.columns(2)
-            
+
             with col1:
                 st.metric("Total Pelanggan", len(rfm))
-            
             with col2:
                 st.metric("Total Transaksi", len(df_clean))
-            
             with col3:
                 period = f"{df_clean['Tanggal'].min().strftime('%d/%m')} - {df_clean['Tanggal'].max().strftime('%d/%m/%Y')}"
                 st.metric("Periode Data", period)
-            
             with col4:
                 vip_count = len(rfm[rfm['Segment'] == 'VIP Customer'])
                 st.metric("VIP Customer", vip_count)
-            
+
             st.markdown("---")
-            
             st.markdown("### Distribusi Segmen")
-            
+
             col1, col2 = st.columns(2)
-            
             with col1:
                 st.plotly_chart(create_cluster_distribution_chart(rfm), use_container_width=True)
-            
             with col2:
                 st.plotly_chart(create_rfm_3d_scatter(rfm), use_container_width=True)
-            
+
             st.markdown("---")
-            
             st.markdown("### Detail 5 Segmentasi Pelanggan")
-            
             st.info("Setiap segmen memiliki karakteristik RFM berbeda. Klik untuk lihat detail pelanggan.")
-            
+
             for cluster_id in sorted(rfm['Cluster'].unique()):
                 cluster_data = rfm[rfm['Cluster'] == cluster_id]
                 label_info = cluster_labels[cluster_id]
-                
+
                 with st.expander(f"{label_info['name']} ({len(cluster_data)} pelanggan) - Diskon {label_info['discount']}%"):
-                    
                     st.markdown("**Deskripsi Segmen:**")
                     st.info(label_info['description'])
-                    
+
                     st.markdown("**Kriteria dan Karakteristik:**")
                     st.code(label_info['criteria'], language=None)
-                    
+
                     st.markdown("---")
-                    
+
                     col1, col2, col3, col4 = st.columns(4)
-                    
                     with col1:
                         st.metric("Avg Recency", f"{cluster_data['Recency'].mean():.0f} hari")
-                    
                     with col2:
                         st.metric("Avg Frequency", f"{cluster_data['Frequency'].mean():.1f}x")
-                    
                     with col3:
                         st.metric("Avg Monetary", f"Rp {cluster_data['Monetary'].mean():,.0f}")
-                    
                     with col4:
                         st.metric("Diskon", f"{label_info['discount']}%")
-                    
+
                     st.markdown("**Daftar Pelanggan:**")
                     st.dataframe(
                         cluster_data[['Konsumen', 'Recency', 'Frequency', 'Monetary']].sort_values('Monetary', ascending=False),
                         use_container_width=True
                     )
-    
+
     st.markdown("---")
     st.markdown("""
 <div style='text-align: center; padding: 2rem 0; color: #666;'>
