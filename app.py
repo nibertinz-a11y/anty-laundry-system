@@ -943,7 +943,7 @@ def main():
 
         with st.expander("Lihat Ringkasan dan Statistik Lengkap", expanded=False):
 
-            st.markdown("### Ringkasan Analisis")
+            st.markdown("## Ringkasan Analisis")
 
             col1, col2 = st.columns(2)
             col3, col4 = st.columns(2)
@@ -960,7 +960,7 @@ def main():
                 st.metric("VIP Customer", vip_count)
 
             st.markdown("---")
-            st.markdown("### Distribusi Segmen")
+            st.markdown("## Distribusi Segmen")
 
             col1, col2 = st.columns(2)
             with col1:
@@ -969,7 +969,7 @@ def main():
                 st.plotly_chart(create_rfm_3d_scatter(rfm), use_container_width=True)
 
             st.markdown("---")
-            st.markdown("### Detail 5 Segmentasi Pelanggan")
+            st.markdown("## Detail 5 Segmentasi Pelanggan")
             st.info("Setiap segmen memiliki karakteristik RFM berbeda. Klik untuk lihat detail pelanggan.")
 
             for cluster_id in sorted(rfm['Cluster'].unique()):
