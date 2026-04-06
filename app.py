@@ -880,7 +880,7 @@ def main():
 
         st.markdown("---")
 
-        st.markdown("### Bagikan Sekarang")
+        st.markdown("## Bagikan Sekarang")
 
         if 'wa_message' not in st.session_state:
             st.session_state['wa_message'] = generate_default_whatsapp_message(top_10)
